@@ -1,4 +1,8 @@
+using ZaitsevBankAPI;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<ApplicationContext>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
