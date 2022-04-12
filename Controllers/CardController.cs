@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using ZaitsevBankAPI.FunctionBank;
 using ZaitsevBankAPI.Services;
 
@@ -33,12 +34,16 @@ namespace ZaitsevBankAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllCards(string userID)
         {
+
             try
             {
                 CardService cardService = new();
                 var cards = await cardService.GetAllCards(userID);
                 if (cards == null) return NotFound();
-                return Ok(cards);
+                string json = JsonConvert.SerializeObject(cards);
+                string encryptCard = EncryptionBank.EncryptCard(json,userID);
+                string dec = EncryptionBank.DecryptCard(encryptCard, userID);
+                return Ok(encryptCard);
 
             }
             catch (Exception)
@@ -64,6 +69,24 @@ namespace ZaitsevBankAPI.Controllers
                     return StatusCode(412, "Не правильный номер телефона");
                 }
 
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Внутренняя ошибка сервера");
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCardsBuySale(string userID, string TypeValute, bool BuySale)
+        {
+            try
+            {
+                CardService cardService = new();
+                var card = await cardService.GetCardsBuySale(userID, TypeValute, BuySale);  
+                if (card == null) return NotFound();
+                string json = JsonConvert.SerializeObject(card);
+                string encryptCard = EncryptionBank.EncryptCard(json,userID);
+                return Ok(encryptCard);
             }
             catch (Exception)
             {

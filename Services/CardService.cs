@@ -13,7 +13,6 @@ namespace ZaitsevBankAPI.Services
         {
             _context = new();
         }
-
         public async Task<bool> CreateCard(string userID, string cardOperator,string nameCard, string typeMoney)
         {
             CreditCard creditCard = new();
@@ -50,13 +49,27 @@ namespace ZaitsevBankAPI.Services
             if (Cards.Count == 0) return null;
 
             DateTime time = DateTime.Now;
+            bool creditClosed = false;
             for(int i = 0; i < Cards.Count; i++)
             {
                 if (Cards[i].DataClosedCard <= time) // Если дейсвительность карты меньше или равно текущему времени, то закрываем карту!
                 {
                     Cards[i].ClosedCard = true;
+                    creditClosed = true;
                 }
             }
+            if (creditClosed) await _context.SaveChangesAsync();
+            return Cards;
+        }
+        public async Task<List<CardModel>?> GetCardsBuySale(string userID, string TypeValute, bool BuySale)
+        {
+            DateTime time = DateTime.Now;
+            var id = Guid.Parse(userID);
+            var Cards = await _context.Cards.Where( card => card.UserID == id && 
+            card.DataClosedCard > time && (BuySale ? card.TypeMoney != TypeValute : card.TypeMoney == TypeValute)).ToListAsync();
+            // Если BuySale по дефолту это true, то ищем карты, которые не равны валюты из запроса, если false, то карты которые нужны для продажи
+            if (Cards == null) return null;
+            if (Cards.Count == 0) return null;
             return Cards;
         }
         public async Task<CardSearch?> GetCardFromPhone(string phone, string typeValute)
