@@ -19,77 +19,59 @@ namespace ZaitsevBankAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> Sign()
         {
-            try
-            {
-                StringValues headerValueLogin = Request.Headers["login"];
-                if (headerValueLogin.Any() == false) return BadRequest(); //401
 
-                StringValues headerValuePass = Request.Headers["password"];
-                if (headerValuePass.Any() == false) return BadRequest(); //401
+            StringValues headerValueLogin = Request.Headers["login"];
+            if (headerValueLogin.Any() == false) return BadRequest(); //401
 
-                string Login = headerValueLogin.ToString();
-                string Password = headerValuePass.ToString();
-                if (RegexUtilities.IsValidEmail(Login) == false) return StatusCode(412, "Не верный email");
+            StringValues headerValuePass = Request.Headers["password"];
+            if (headerValuePass.Any() == false) return BadRequest(); //401
 
-                UserService userService = new();
-                var data = await userService.SignIn(Login, Password);
-                if (data == null) return NotFound();
+            string Login = headerValueLogin.ToString();
+            string Password = headerValuePass.ToString();
+            if (RegexUtilities.IsValidEmail(Login) == false) return StatusCode(412, "Не верный email");
 
-                return Ok(data);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500, "Внутренняя ошибка сервера " + e.Message);
-            }
+            UserService userService = new();
+            var data = await userService.SignIn(Login, Password);
+            if (data == null) return NotFound();
+
+            return Ok(data);
+
         }
 
         [HttpGet]
         public async Task<IActionResult> GetUserData(string userID)
         {
-            try
-            {
                 UserService userService = new();
                 var data = await userService.GetUserData(userID);
                 if (data == null) return NotFound();
-                return Ok(data);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Внутренняя ошибка сервера");
-            }
+                return Ok(data);   
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateAccount(string FirstName, string LastName, string MiddleName, string Birthday, string Gender)
         {
-            try
-            {
-                StringValues headerValueLogin = Request.Headers["login"];
-                if (headerValueLogin.Any() == false) return BadRequest(); //401
 
-                StringValues headerValuePass = Request.Headers["password"];
-                if (headerValuePass.Any() == false) return BadRequest(); //401
+            StringValues headerValueLogin = Request.Headers["login"];
+            if (headerValueLogin.Any() == false) return BadRequest(); //401
 
-                StringValues headerValuePhone = Request.Headers["phone"];
-                if (headerValuePhone.Any() == false) return BadRequest(); //401
+            StringValues headerValuePass = Request.Headers["password"];
+            if (headerValuePass.Any() == false) return BadRequest(); //401
 
-                string Login = headerValueLogin.ToString();
-                string Password = headerValuePass.ToString();
-                string Phone = headerValuePhone.ToString();
+            StringValues headerValuePhone = Request.Headers["phone"];
+            if (headerValuePhone.Any() == false) return BadRequest(); //401
 
-                if (RegexUtilities.IsValidEmail(Login) == false) return StatusCode(412, "Не верный email");
-                if (RegexUtilities.isValidPhone(Phone) == false) return StatusCode(412, "Не верный номер телефона");
+            string Login = headerValueLogin.ToString();
+            string Password = headerValuePass.ToString();
+            string Phone = headerValuePhone.ToString();
 
-                UserService userService = new();
-                var data = await userService.CreateAccount(Login, Password, Phone, FirstName, LastName, MiddleName, Birthday, Gender);
+            if (RegexUtilities.IsValidEmail(Login) == false) return StatusCode(412, "Не верный email");
+            if (RegexUtilities.isValidPhone(Phone) == false) return StatusCode(412, "Не верный номер телефона");
 
-                return data != null ? Ok(data) : StatusCode(412, "Такой пользователь уже существует");
+            UserService userService = new();
+            var data = await userService.CreateAccount(Login, Password, Phone, FirstName, LastName, MiddleName, Birthday, Gender);
 
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Внутренняя ошибка сервера");
-            }
+            return data != null ? Ok(data) : StatusCode(412, "Такой пользователь уже существует");
+
         }
     }
 }
