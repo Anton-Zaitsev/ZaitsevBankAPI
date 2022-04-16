@@ -8,13 +8,19 @@
             VISA = 4,
             MIR = 2
         }
-        private List<string> CardValute =  new List<string> {
+        private List<string> CardValute =  new () {
             "EUR",
             "USD",
             "RUB",
             "BTC",
             "ETH"
         };
+        private List<string> ElectronValute = new()
+        {
+            "BTC",
+            "ETH"
+        };
+
         private readonly int lenghtCardNumber = 16;
         public string? generateCardNumber(string CardOperator)
         {
@@ -34,10 +40,15 @@
         {
             return new Random().Next(100, 1000).ToString(); // Генерация CVV от 100 до 999, чтобы обязательно было 3 числа
         }
-        public bool isValidValute(string typeValute)
+        public string? isValidValuteType(string typeValute)
         {
-            return CardValute.Contains(typeValute);
+           return CardValute.Contains(typeValute) ? typeValute : null;
         }
+        public bool isElectronValute(string typeValute)
+        {
+            return ElectronValute.Contains(typeValute);
+        }
+
         public bool isValid(string NumberCard)
         {
             NumberCard = NumberCard.Trim();

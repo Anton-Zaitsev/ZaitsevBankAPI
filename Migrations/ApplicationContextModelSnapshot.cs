@@ -68,6 +68,35 @@ namespace ZaitsevBankAPI.Migrations
                     b.ToTable("Cards");
                 });
 
+            modelBuilder.Entity("ZaitsevBankAPI.Models.Exchange", b =>
+                {
+                    b.Property<string>("IDValute")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("ChangesBuy")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ChangesSale")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("CharCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("ElectronValute")
+                        .HasColumnType("bit");
+
+                    b.Property<double>("ValuteBuy")
+                        .HasColumnType("float");
+
+                    b.Property<double>("ValuteSale")
+                        .HasColumnType("float");
+
+                    b.HasKey("IDValute");
+
+                    b.ToTable("Exchanges");
+                });
+
             modelBuilder.Entity("ZaitsevBankAPI.Models.UserModel", b =>
                 {
                     b.Property<Guid>("UserID")

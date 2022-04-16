@@ -1,4 +1,5 @@
 using ZaitsevBankAPI;
+using ZaitsevBankAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,8 @@ builder.Services.AddDbContext<ApplicationContext>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddMvc();
+
+builder.Services.AddHostedService<ExchangeBackroungUpdateService>(); //Автоматическое обновление Валют
 
 builder.Services.AddEndpointsApiExplorer();
 

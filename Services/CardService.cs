@@ -19,7 +19,7 @@ namespace ZaitsevBankAPI.Services
             var numberCard = creditCard.generateCardNumber(cardOperator);
             if (numberCard == null) return false;
             typeMoney = typeMoney.ToUpper();
-            if (!creditCard.isValidValute(typeMoney)) return false;
+            if (creditCard.isValidValuteType(typeMoney) != null) return false;
             string CVV_card = creditCard.generateCVV();
             var id = Guid.Parse(userID);
             DateTime timeClosedCard = DateTime.Now.AddYears(timeActivateCard);
@@ -74,7 +74,7 @@ namespace ZaitsevBankAPI.Services
         }
         public async Task<CardSearch?> GetCardFromPhone(string phone, string typeValute)
         {
-            if (new CreditCard().isValidValute(typeValute.ToUpper()) == false) return null;
+            if (new CreditCard().isValidValuteType(typeValute.ToUpper()) != null) return null;
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Phone == phone);
             if (user == null) return null;
             var card = await _context.Cards.FirstOrDefaultAsync(y => y.UserID == user.UserID && y.TypeMoney == typeValute);

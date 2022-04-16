@@ -31,6 +31,23 @@ namespace ZaitsevBankAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Exchanges",
+                columns: table => new
+                {
+                    IDValute = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CharCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ChangesBuy = table.Column<bool>(type: "bit", nullable: false),
+                    ValuteBuy = table.Column<double>(type: "float", nullable: false),
+                    ChangesSale = table.Column<bool>(type: "bit", nullable: false),
+                    ValuteSale = table.Column<double>(type: "float", nullable: false),
+                    ElectronValute = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Exchanges", x => x.IDValute);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -54,6 +71,9 @@ namespace ZaitsevBankAPI.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Cards");
+
+            migrationBuilder.DropTable(
+                name: "Exchanges");
 
             migrationBuilder.DropTable(
                 name: "Users");

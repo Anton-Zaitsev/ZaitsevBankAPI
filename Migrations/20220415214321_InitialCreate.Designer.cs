@@ -12,7 +12,7 @@ using ZaitsevBankAPI;
 namespace ZaitsevBankAPI.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20220409180444_InitialCreate")]
+    [Migration("20220415214321_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -68,6 +68,35 @@ namespace ZaitsevBankAPI.Migrations
                     b.HasKey("CardID");
 
                     b.ToTable("Cards");
+                });
+
+            modelBuilder.Entity("ZaitsevBankAPI.Models.Exchange", b =>
+                {
+                    b.Property<string>("IDValute")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("ChangesBuy")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ChangesSale")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("CharCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("ElectronValute")
+                        .HasColumnType("bit");
+
+                    b.Property<double>("ValuteBuy")
+                        .HasColumnType("float");
+
+                    b.Property<double>("ValuteSale")
+                        .HasColumnType("float");
+
+                    b.HasKey("IDValute");
+
+                    b.ToTable("Exchanges");
                 });
 
             modelBuilder.Entity("ZaitsevBankAPI.Models.UserModel", b =>
