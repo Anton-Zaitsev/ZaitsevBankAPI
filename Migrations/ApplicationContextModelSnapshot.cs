@@ -86,6 +86,10 @@ namespace ZaitsevBankAPI.Migrations
                     b.Property<bool>("ElectronValute")
                         .HasColumnType("bit");
 
+                    b.Property<string>("NameValute")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<double>("ValuteBuy")
                         .HasColumnType("float");
 

@@ -1,10 +1,48 @@
 ﻿@page
 @model IndexModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
 @{
     ViewData["Title"] = "Home page";
+
 }
 
-<div class="text-center">
-    <h1 class="display-4">Добро пожаловать на ZaitsevBank</h1>
-    <p>Свидание окончено, вам эта функция не предложена)</p>
+<form method="post">
+<div class="container">
+   <div class="row justify-content-center align-items-center" style="margin-top:10%">
+
+       <div class="col">
+           <img src="https://preview.colorlib.com/theme/bootstrap/login-form-07/images/undraw_remotely_2j6y.svg" class="img-fluid" alt="...">
+       </div>
+
+        <div class="col justify-content-md-center" style="margin-left:1em;">
+            <div class="col-8">
+                <p style="color: black;" class="h3">Вход в ZaitsevBank</p>
+                <p style="color: gray;" class="h4">Первый банк с использованием крипто-валют.</p>
+
+                <div class="form-floating mb-3" style="margin-top:1em;">
+                 <input asp-for="UserData.Login"  class="form-control" type="email" id="floatingInput" placeholder="Пользователь">
+                 <label for="floatingInput">Пользователь</label>
+                </div>
+
+                <div class="form-floating" style="margin-top:1em;">
+                <input asp-for="UserData.Password" type="password" class="form-control" id="floatingPassword" placeholder="Пароль">
+                 <label for="floatingPassword">Пароль</label>
+                </div>
+
+                <div class="form-check" style="margin-top:1em;">
+                        <input class="form-check-input" type="checkbox" style="background-color: #6c63ff;border-color: #6c63ff" value="" id="flexCheckChecked" checked>
+                        <label class="form-check-label" for="flexCheckChecked">
+                        Запомнить пароль
+                        </label>
+                    </div>
+
+                 <button style="margin-top:1.5em;background-color:#6c63ff;border-color:#6c63ff;width:100%;height:3.5em;font-weight:500;" type="submit" class="btn btn-primary">Войти</button>
+
+            </div>
+            <div class="col-4"></div>
+        </div>
+
+   </div>
 </div>
+</form>

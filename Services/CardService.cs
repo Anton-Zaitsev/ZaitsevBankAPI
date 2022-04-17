@@ -19,7 +19,7 @@ namespace ZaitsevBankAPI.Services
             var numberCard = creditCard.generateCardNumber(cardOperator);
             if (numberCard == null) return false;
             typeMoney = typeMoney.ToUpper();
-            if (creditCard.isValidValuteType(typeMoney) != null) return false;
+            if (creditCard.isValidValuteType(typeMoney) == null) return false;
             string CVV_card = creditCard.generateCVV();
             var id = Guid.Parse(userID);
             DateTime timeClosedCard = DateTime.Now.AddYears(timeActivateCard);

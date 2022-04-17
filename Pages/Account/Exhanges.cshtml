@@ -1,0 +1,88 @@
+﻿@page
+@using ZaitsevBankAPI.Models
+@model ZaitsevBankAPI.Pages.Account.ExhangesModel
+
+@{
+    ViewData["Title"] = "Валютная биржа";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+        </div>
+        <div class="col-6" style="text-align:center; font-weight: bolder; font-size: larger; margin: 1em;">
+            Курсы валют с @Model.dataNow
+        </div>
+        <div class="col">
+        </div>
+    </div>
+
+    <div class="row">
+          <table class="table table-dark table-striped">
+          <thead>
+            <tr>
+              <th scope="col">Код</th>
+              <th scope="col">Валюта</th>
+              <th scope="col">Продажа</th>
+              <th scope="col">Покупка</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+               @foreach(Exchange exchange in Model.exchanges)
+                {
+                    string styleValuteBuy = exchange.ChangesBuy ? "color:green; font-weight: 500;" : "color:red; font-weight: 500;";
+                    string styleValuteSale = exchange.ChangesSale ? "color:green; font-weight: 500;" : "color:red; font-weight: 500;";
+
+                     <tr>
+                      <th scope="row">@exchange.CharCode</th>
+                      <td>@exchange.NameValute</td>
+                      <td style="@styleValuteBuy">@exchange.ValuteBuy</td>
+                      <td style="@styleValuteSale">@exchange.ValuteSale</td>
+                    </tr>
+                }
+           
+          </tbody>
+        </table>
+    </div>
+
+    <div class="row">
+        <div class="col">
+        </div>
+        <div class="col-6" style="text-align:center; font-weight: bolder; font-size: larger; margin: 1em;">
+            Курсы крипто-валют с @Model.dataNow
+        </div>
+        <div class="col">
+        </div>
+    </div>
+
+    <div class="row">
+          <table class="table table-dark table-striped">
+          <thead>
+            <tr>
+              <th scope="col">Код</th>
+              <th scope="col">Валюта</th>
+              <th scope="col">Продажа</th>
+              <th scope="col">Покупка</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+               @foreach(Exchange exchange in Model.exchangesElectron)
+                {
+                    string styleValuteBuy = exchange.ChangesBuy ? "color:green; font-weight: 500;" : "color:red; font-weight: 500;";
+                    string styleValuteSale = exchange.ChangesSale ? "color:green; font-weight: 500;" : "color:red; font-weight: 500;";
+
+                     <tr>
+                      <th scope="row">@exchange.CharCode</th>
+                      <td>@exchange.NameValute</td>
+                      <td style="@styleValuteBuy">@exchange.ValuteBuy</td>
+                      <td style="@styleValuteSale">@exchange.ValuteSale</td>
+                    </tr>
+                }
+           
+          </tbody>
+        </table>
+    </div>
+
+</div>

@@ -13,7 +13,7 @@ namespace ZaitsevBankAPI.Services
             _context = new();
         }
         
-        public async Task<List<Exchange>?> GetExhangeList(bool ElectronValute)
+        public async Task<List<Exchange>?> GetExchangeList(bool ElectronValute)
         {
             var list = await _context.Exchanges.Where(x => x.ElectronValute == ElectronValute).ToListAsync();
             return list.Count == 0 ? null : list;
@@ -249,22 +249,23 @@ namespace ZaitsevBankAPI.Services
                         {
                             if (valutes.Value is JToken) {
                                 var valute = (JToken)valutes.Value;
-                                var ID = (string)valute["ID"];
-                                var CharCode = (string)valute["CharCode"];
-                                var Nominal = (int)valute["Nominal"];
-                                var Name = (string)valute["Name"];
-                                var Value = (double)valute["Value"];
-                                var Previous = (double)valute["Previous"];
+                                var ID = (string?)valute["ID"];
+                                var CharCode = (string?)valute["CharCode"];
+                                var Nominal = (int?)valute["Nominal"];
+                                var Name = (string?)valute["Name"];
+                                var Value = (double?)valute["Value"];
+                                var Previous = (double?)valute["Previous"];
 
                                 if (ID == null || CharCode == null || Nominal == null || Name == null || Value == null || Previous == null)
                                     continue;
                                 else
                                 {
-                                    double valuteBuy = Math.Round(Value / Nominal, 4);
+                                    double valuteBuy = Math.Round(Value.Value / Nominal.Value, 4);
                                     double valuteSale = Math.Round(GetNextSaleValute(rnd, valuteBuy), 4); // Сокращения знака до 4 и Рандомное число от 1.5 до 10
                                     Exchange exchange = new()
                                     {
                                         IDValute = ID,
+                                        NameValute = Name,
                                         CharCode = CharCode,
                                         ChangesBuy = Value > Previous,
                                         ValuteBuy = valuteBuy,
@@ -317,25 +318,26 @@ namespace ZaitsevBankAPI.Services
                             //ValuteCb valuteCb = JsonConvert.DeserializeObject<ValuteCb>(json);
                             var objectJson = JObject.Parse(json);
                             if (objectJson == null) return null;
-                            var dict = (JArray)objectJson["data"];
+                            var dict = (JArray?)objectJson["data"];
                             if (dict == null) return null;
                             foreach (var valute in dict)
                             {
-                                var ID = (string)valute["id"];
-                                var CharCode = (string)valute["symbol"];
-                                var Name = (string)valute["name"];
-                                var Value = (double)valute["priceUsd"];
-                                var Changes = (double)valute["changePercent24Hr"];
+                                var ID = (string?)valute["id"];
+                                var CharCode = (string?)valute["symbol"];
+                                var Name = (string?)valute["name"];
+                                var Value = (double?)valute["priceUsd"];
+                                var Changes = (double?)valute["changePercent24Hr"];
 
                                 if (ID == null || CharCode == null || Name == null || Value == null || Changes == null)
                                     continue;
                                 else
                                 {
-                                    double valuteBuy = Math.Round(Value, 4);
+                                    double valuteBuy = Math.Round(Value.Value, 4);
                                     double valuteSale = Math.Round(GetNextSaleValute(rnd, valuteBuy), 4); // Сокращения знака до 4 и Рандомное число от 1.5 до 10
                                     Exchange exchange = new()
                                     {
                                         IDValute = ID,
+                                        NameValute = Name,
                                         CharCode = CharCode,
                                         ChangesBuy = Changes > 0,
                                         ValuteBuy = valuteBuy,

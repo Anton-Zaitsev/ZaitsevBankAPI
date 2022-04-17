@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ZaitsevBankAPI.Services;
 
 namespace ZaitsevBankAPI.Controllers
@@ -18,14 +17,15 @@ namespace ZaitsevBankAPI.Controllers
         public async Task<IActionResult> UpdateValuteDataBase()
         {
             ExchangesService exchangesService = new();
-            if (await exchangesService.ExchangesUpdate())
-            {
-                return Ok();
-            }
-            else
-            {
-                return BadRequest(); //401
-            }
+            return await exchangesService.ExchangesUpdate() ? Ok() : BadRequest();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetExchangeList(bool ElectronValute)
+        {
+            ExchangesService exchangesService = new();
+            var list = await exchangesService.GetExchangeList(ElectronValute);
+            return list != null ? Ok(list) : NotFound();
         }
 
         [HttpGet]

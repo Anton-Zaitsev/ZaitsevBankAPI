@@ -36,6 +36,7 @@ namespace ZaitsevBankAPI.Migrations
                 {
                     IDValute = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CharCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NameValute = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ChangesBuy = table.Column<bool>(type: "bit", nullable: false),
                     ValuteBuy = table.Column<double>(type: "float", nullable: false),
                     ChangesSale = table.Column<bool>(type: "bit", nullable: false),

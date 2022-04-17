@@ -10,6 +10,8 @@ namespace ZaitsevBankAPI.Models
         [Required]
         public string CharCode { get; set; }
         [Required]
+        public string NameValute { get; set; }
+        [Required]
         public bool ChangesBuy { get; set; }
         [Required]
         public double ValuteBuy { get; set; }

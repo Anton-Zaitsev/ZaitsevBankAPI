@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "t3gkIxBWRFqFPizOfWlgKIXP6yLs1EGdDwJAaK506Aw=",
+  "Hash": "HnMmT1pGwdghyMeUvgriGx8ds8XfSyFb+Nx6fzcWWHw=",
   "Source": "ZaitsevBankAPI",
   "BasePath": "_content/ZaitsevBankAPI",
   "Mode": "Default",
@@ -66,6 +66,23 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\css\\site.css"
+    },
+    {
+      "Identity": "C:\\ZaitsevBankAPI\\wwwroot\\css\\StyleExhange.css",
+      "SourceId": "ZaitsevBankAPI",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\ZaitsevBankAPI\\wwwroot\\",
+      "BasePath": "_content/ZaitsevBankAPI",
+      "RelativePath": "css/StyleExhange.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\css\\StyleExhange.css"
     },
     {
       "Identity": "C:\\ZaitsevBankAPI\\wwwroot\\favicon.ico",
