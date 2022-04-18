@@ -23,5 +23,11 @@ namespace ZaitsevBankAPI.Models
         public bool ElectronValute { get; set; }
     }
 
+    public class ExhangeValuteAtoValuteB
+    {
+        public double ValuteConvert { get; set; }
+        public double Count { get; set; }
+        public DateTime actualDateTime { get; set; }
+    }
 
 }

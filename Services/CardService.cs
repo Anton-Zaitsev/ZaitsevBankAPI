@@ -72,6 +72,7 @@ namespace ZaitsevBankAPI.Services
             if (Cards.Count == 0) return null;
             return Cards;
         }
+
         public async Task<CardSearch?> GetCardFromPhone(string phone, string typeValute)
         {
             if (new CreditCard().isValidValuteType(typeValute.ToUpper()) != null) return null;

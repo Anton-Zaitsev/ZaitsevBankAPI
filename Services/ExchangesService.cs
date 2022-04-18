@@ -19,11 +19,12 @@ namespace ZaitsevBankAPI.Services
             return list.Count == 0 ? null : list;
         }
 
-        public async Task<double?> ValuteATOValuteB(string ValuteA, string ValuteB, bool BuySale,double count = 1)
+        public async Task<ExhangeValuteAtoValuteB?> ValuteATOValuteB(string ValuteA, string ValuteB, bool BuySale,double? CountValute)
         {
             // Конверт из A -> Б
             // Count принадлжит валюты А
             // BuySale - true -- ПОКУПКА
+
             FunctionBank.CreditCard creditCard = new();
             var valuteTypeA =  creditCard.isValidValuteType(ValuteA);
             var valuteTypeB =  creditCard.isValidValuteType(ValuteB);
@@ -33,19 +34,26 @@ namespace ZaitsevBankAPI.Services
 
             if (creditCard.isElectronValute(ValuteA) && creditCard.isElectronValute(ValuteB) == false) // Карта типа А Электронная валюта и B обычная
             {
+                double count = CountValute ?? 1; // Default
+                ExhangeValuteAtoValuteB exhange = new();
+                exhange.actualDateTime = DateTime.Now;
+                exhange.Count = count;
+
                 var valuteA = await _context.Exchanges.FirstOrDefaultAsync(valute => valute.CharCode == ValuteA); // ВалютаА всегда в долларах
                 if (valuteA == null) return null;
 
                 if (ValuteB == "USD")
                 {
-                    return BuySale ? Math.Round(valuteA.ValuteBuy * count, 4) : Math.Round(valuteA.ValuteSale * count, 4);
+                    exhange.ValuteConvert = BuySale ? Math.Round(valuteA.ValuteBuy * count, 4) : Math.Round(valuteA.ValuteSale * count, 4);
+                    return exhange;
 
                 }
                 else if (ValuteB == "RUB")
                 {
                     var usd = await _context.Exchanges.FindAsync("R01235"); //Находим доллар в рублях
                     if (usd == null) return null;
-                    return BuySale ? Math.Round((valuteA.ValuteBuy  * count) * usd.ValuteBuy, 4) : Math.Round((valuteA.ValuteSale * count) * usd.ValuteBuy, 4);
+                    exhange.ValuteConvert = BuySale ? Math.Round((valuteA.ValuteBuy * count) * usd.ValuteBuy, 4) : Math.Round((valuteA.ValuteSale * count) * usd.ValuteBuy, 4);
+                    return exhange;
                 }
                 else
                 {
@@ -57,28 +65,38 @@ namespace ZaitsevBankAPI.Services
 
                     double valuteBConvert = (BuySale ? valuteB.ValuteBuy : valuteB.ValuteSale * count) / usd.ValuteBuy;
                     double bitValute = (valuteA.ValuteBuy * count);
-
-                    return BuySale ? Math.Round(bitValute / valuteBConvert, 4) : Math.Round(bitValute / valuteBConvert, 4); ;
-
+                    exhange.ValuteConvert = BuySale ? Math.Round(bitValute / valuteBConvert, 4) : Math.Round(bitValute / valuteBConvert, 4);
+                    return exhange;
                 }   
 
             }
             else if (creditCard.isElectronValute(ValuteA) == false && creditCard.isElectronValute(ValuteB))// Карта типа A обычная и B электронная
             {
+                ExhangeValuteAtoValuteB exhange = new();
+                exhange.actualDateTime = DateTime.Now;
+
                 var valuteB = await _context.Exchanges.FirstOrDefaultAsync(valute => valute.CharCode == ValuteB); // ВалютаB всегда в долларах
                 if (valuteB == null) return null;
 
                 if (ValuteA == "USD")
                 {
-                    return BuySale ?  (1* count) / valuteB.ValuteBuy : (1 * count) / valuteB.ValuteSale;
+                    double count = CountValute ?? 1000; // Default to USD
+                    exhange.Count = count;
+                    exhange.ValuteConvert = BuySale ? (1 * count) / valuteB.ValuteBuy : (1 * count) / valuteB.ValuteSale;
+                    return exhange;
 
                 }
                 else if (ValuteA == "RUB")
                 {
                     var usd = await _context.Exchanges.FindAsync("R01235"); //Находим доллар в рублях
                     if (usd == null) return null;
+
+                    double count = CountValute ?? 100000; // Default to RUB
+                    exhange.Count = count;
+
                     double rub =  (1 * count) / usd.ValuteBuy;
-                    return BuySale ? rub / valuteB.ValuteBuy : rub / valuteB.ValuteSale;
+                    exhange.ValuteConvert = BuySale ? rub / valuteB.ValuteBuy : rub / valuteB.ValuteSale;
+                    return exhange;
                 }
                 else
                 {
@@ -87,45 +105,60 @@ namespace ZaitsevBankAPI.Services
                     var valuteA = await _context.Exchanges.FirstOrDefaultAsync(valute => valute.CharCode == ValuteA); // Находим валюту, которую мы ищем
                     if (valuteA == null) return null;
 
+                    double count = CountValute ?? 1000; // Default
+                    exhange.Count = count;
+
                     var valuteAConvert = (valuteA.ValuteBuy * count) / usd.ValuteBuy;
                     // Переводим электронную валюту в rub посредством продажи доллара и продажи битка
                     // Находим 
-                    return BuySale ? valuteAConvert / valuteB.ValuteBuy : valuteAConvert / valuteB.ValuteSale;
+                    exhange.ValuteConvert = BuySale ? valuteAConvert / valuteB.ValuteBuy : valuteAConvert / valuteB.ValuteSale;
+                    return exhange;
 
                 }
 
             }
             else if (creditCard.isElectronValute(ValuteA) && creditCard.isElectronValute(ValuteB)) // Обе карты электронные валюты
             {
+                ExhangeValuteAtoValuteB exhange = new();
+                exhange.actualDateTime = DateTime.Now;
+
                 var valuteA = await _context.Exchanges.FirstOrDefaultAsync(valute => valute.CharCode == ValuteA);
                 if (valuteA == null) return null;
                 var valuteB = await _context.Exchanges.FirstOrDefaultAsync(valute => valute.CharCode == ValuteB);
                 if (valuteB == null) return null;
 
                 // Например 1 биткойн в Thether
-
-                return BuySale ? Math.Round((valuteA.ValuteBuy * count) / valuteB.ValuteBuy, 4) : Math.Round((valuteA.ValuteBuy * count) / valuteB.ValuteSale, 4);
+                double count = CountValute ?? 1; // Default
+                exhange.Count = count;
+                exhange.ValuteConvert = BuySale ? Math.Round((valuteA.ValuteBuy * count) / valuteB.ValuteBuy, 4) : Math.Round((valuteA.ValuteBuy * count) / valuteB.ValuteSale, 4);
+                return exhange;
 
             }
             else if (creditCard.isElectronValute(ValuteA) == false && creditCard.isElectronValute(ValuteB) == false) // Обе карты обычные валюты
             {
+                ExhangeValuteAtoValuteB exhange = new();
+                exhange.actualDateTime = DateTime.Now;
+                double count = CountValute ?? 1; // Default
+                exhange.Count = count;
+
                 if (ValuteA == "RUB" && ValuteB != "RUB") // --> Рубли в Доллары допустим
                 {
                     var valuteB = await _context.Exchanges.FirstOrDefaultAsync(valute => valute.CharCode == ValuteB);
                     if (valuteB == null) return null;
-
-                    return BuySale ? Math.Round((1 * count) / valuteB.ValuteBuy, 4) : Math.Round((1 * count) / valuteB.ValuteSale, 4);
+                    exhange.ValuteConvert = BuySale ? Math.Round((1 * count) / valuteB.ValuteBuy, 4) : Math.Round((1 * count) / valuteB.ValuteSale, 4);
+                    return exhange;
                 }
                 else if (ValuteA != "RUB" && ValuteB == "RUB") // --> Доллары в рубли допустим
                 {
                     var valuteA = await _context.Exchanges.FirstOrDefaultAsync(valute => valute.CharCode == ValuteA);
                     if (valuteA == null) return null;
-
-                    return BuySale ? Math.Round(valuteA.ValuteBuy * count, 4) : Math.Round(valuteA.ValuteSale * count, 4);
+                    exhange.ValuteConvert = BuySale ? Math.Round(valuteA.ValuteBuy * count, 4) : Math.Round(valuteA.ValuteSale * count, 4);
+                    return exhange;
                 }
                 else if (ValuteA == "RUB" && ValuteB == "RUB")
                 {
-                    return Math.Round(1 * count, 4);
+                    exhange.ValuteConvert = Math.Round(1 * count, 4);
+                    return exhange;
                 }
                 else // --> Доллары в ЕВРО допустим
                 {
@@ -133,8 +166,8 @@ namespace ZaitsevBankAPI.Services
                     if (valuteA == null) return null;
                     var valuteB = await _context.Exchanges.FirstOrDefaultAsync(valute => valute.CharCode == ValuteB);
                     if (valuteB == null) return null;
-
-                    return BuySale ? Math.Round((valuteA.ValuteBuy * count) / valuteB.ValuteBuy, 4): Math.Round((valuteA.ValuteBuy * count) / valuteB.ValuteSale, 4); // Например 1 Евро в $ 
+                    exhange.ValuteConvert = BuySale ? Math.Round((valuteA.ValuteBuy * count) / valuteB.ValuteBuy, 4) : Math.Round((valuteA.ValuteBuy * count) / valuteB.ValuteSale, 4);
+                    return exhange;  // Например 1 Евро в $ 
 
                 }
             }

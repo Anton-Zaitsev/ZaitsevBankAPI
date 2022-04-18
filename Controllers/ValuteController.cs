@@ -36,7 +36,7 @@ namespace ZaitsevBankAPI.Controllers
             return list != null ? Ok(list) : NotFound();
         }
         [HttpGet]
-        public async Task<IActionResult> ValuteATOValuteB(string ValuteA, string ValuteB, bool BuySale, double count = 1)
+        public async Task<IActionResult> ValuteATOValuteB(string ValuteA, string ValuteB, bool BuySale, double? count = null)
         {
             ExchangesService exchangesService = new();
             var change = await exchangesService.ValuteATOValuteB(ValuteA, ValuteB, BuySale, count);
