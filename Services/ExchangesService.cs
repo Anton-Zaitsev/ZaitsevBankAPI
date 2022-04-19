@@ -130,7 +130,7 @@ namespace ZaitsevBankAPI.Services
                 // Например 1 биткойн в Thether
                 double count = CountValute ?? 1; // Default
                 exhange.Count = count;
-                exhange.ValuteConvert = BuySale ? Math.Round((valuteA.ValuteBuy * count) / valuteB.ValuteBuy, 4) : Math.Round((valuteA.ValuteBuy * count) / valuteB.ValuteSale, 4);
+                exhange.ValuteConvert = BuySale ? Math.Round((valuteA.ValuteBuy * count) / valuteB.ValuteBuy, 6) : Math.Round((valuteA.ValuteBuy * count) / valuteB.ValuteSale, 6);
                 return exhange;
 
             }
