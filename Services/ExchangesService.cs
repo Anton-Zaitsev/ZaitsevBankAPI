@@ -246,8 +246,8 @@ namespace ZaitsevBankAPI.Services
                     {
                         ExchangesDB[index].ChangesBuy = Exchange.ChangesBuy;
                         ExchangesDB[index].ChangesSale = Exchange.ValuteSale > ExchangesDB[index].ValuteSale ;
-                        ExchangesDB[index].ValuteBuy =  Exchange.ValuteBuy;
-                        ExchangesDB[index].ValuteSale = Exchange.ValuteSale;
+                        ExchangesDB[index].ValuteBuy = Math.Round(Exchange.ValuteBuy, ExchangesDB[index].ElectronValute ? 6 : 4);
+                        ExchangesDB[index].ValuteSale = Math.Round(Exchange.ValuteSale, ExchangesDB[index].ElectronValute ? 6 : 4);
                     }
                 }
                 _context.Exchanges.UpdateRange(ExchangesDB);
@@ -365,8 +365,8 @@ namespace ZaitsevBankAPI.Services
                                     continue;
                                 else
                                 {
-                                    double valuteBuy = Math.Round(Value.Value, 4);
-                                    double valuteSale = Math.Round(GetNextSaleValute(rnd, valuteBuy), 4); // Сокращения знака до 4 и Рандомное число от 1.5 до 10
+                                    double valuteBuy = Math.Round(Value.Value, 6);
+                                    double valuteSale = Math.Round(GetNextSaleValute(rnd, valuteBuy), 6); // Сокращения знака до 4 и Рандомное число от 1.5 до 10
                                     Exchange exchange = new()
                                     {
                                         IDValute = ID,
