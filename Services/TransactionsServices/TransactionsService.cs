@@ -72,6 +72,7 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                     var userRecipient = await userService.GetUserData(cardRecipient.UserID.ToString());
                     if (userRecipient == null) return false;
 
+                    CreditCard creditCard = new();
                     if (userSender.UserID != userRecipient.UserID) // Проверяем, не одинаковые ли это пользователи (перевод между картами)
                     {
                         Operation.OperationNumber sender = Operation.OperationNumber.OutgoingTransfer;
@@ -122,6 +123,8 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                             cardRecipient.MoneyCard += value;
                         }
 
+                        cardSender.MoneyCard = Math.Round(cardSender.MoneyCard, creditCard.isElectronValute(cardSender.TypeMoney) ? 6 : 2);
+                        cardRecipient.MoneyCard = Math.Round(cardRecipient.MoneyCard, creditCard.isElectronValute(cardRecipient.TypeMoney) ? 6 : 2);
                         _context.Cards.UpdateRange(cardSender, cardRecipient);
                         await _context.SaveChangesAsync(); // Сохраняем изменения для перевода карт
 
@@ -180,7 +183,8 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                             cardSender.MoneyCard -= value;
                             cardRecipient.MoneyCard += value;
                         }
-
+                        cardSender.MoneyCard = Math.Round(cardSender.MoneyCard, creditCard.isElectronValute(cardSender.TypeMoney) ? 6 : 2);
+                        cardRecipient.MoneyCard = Math.Round(cardRecipient.MoneyCard, creditCard.isElectronValute(cardRecipient.TypeMoney) ? 6 : 2);
                         _context.Cards.UpdateRange(cardSender, cardRecipient);
                         await _context.SaveChangesAsync(); // Сохраняем изменения для перевода карт
 
@@ -238,8 +242,13 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
 
                 var count = await CurrencyTransferTransaction(cardA.UserID, TransactionA, cardA.TypeMoney, cardB.TypeMoney, value, BuySale);
                 if (count == null) return false;
+
                 cardA.MoneyCard -= value;
                 cardB.MoneyCard = (double)(cardB.MoneyCard + count);
+
+                CreditCard creditCard = new();
+                cardA.MoneyCard = Math.Round(cardA.MoneyCard, creditCard.isElectronValute(cardA.TypeMoney) ? 6 : 2);
+                cardB.MoneyCard = Math.Round(cardB.MoneyCard, creditCard.isElectronValute(cardB.TypeMoney) ? 6 : 2);
 
                 _context.Cards.UpdateRange(cardA, cardB);
                 await _context.SaveChangesAsync(); // Сохраняем изменения для перевода

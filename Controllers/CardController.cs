@@ -26,11 +26,11 @@ namespace ZaitsevBankAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllCards(string userID)
+        public async Task<IActionResult> GetAllCards(string userID,string? filterCard)
         {
 
             CardService cardService = new();
-            var cards = await cardService.GetAllCards(userID);
+            var cards = filterCard == null ? await cardService.GetAllCards(userID) : await cardService.GetAllCardFilter(userID, filterCard);
             if (cards == null) return NotFound();
             string json = JsonConvert.SerializeObject(cards);
             string encryptCard = EncryptionBank.EncryptCard(json,userID);

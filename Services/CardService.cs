@@ -53,6 +53,7 @@ namespace ZaitsevBankAPI.Services
             if (Cards == null) return null;
             if (Cards.Count == 0) return null;
 
+            /*
             DateTime time = DateTime.Now;
             bool creditClosed = false;
             for(int i = 0; i < Cards.Count; i++)
@@ -64,6 +65,17 @@ namespace ZaitsevBankAPI.Services
                 }
             }
             if (creditClosed) await _context.SaveChangesAsync();
+            */
+            return Cards;
+        }
+
+        public async Task<List<CardModel>?> GetAllCardFilter(string userID, string CardFilter)
+        {
+            Guid id = Guid.Parse(userID);
+            Guid cardFilter = Guid.Parse(CardFilter);
+            var Cards = await _context.Cards.Where(data => data.UserID == id && data.TransactionCard != cardFilter).ToListAsync();
+            if (Cards == null) return null;
+            if (Cards.Count == 0) return null;
             return Cards;
         }
         public async Task<List<CardModel>?> GetCardsBuySale(string userID, string TypeValute, bool BuySale)
@@ -86,8 +98,9 @@ namespace ZaitsevBankAPI.Services
 
             var card = await _context.Cards.FirstOrDefaultAsync(y => y.UserID == user.UserID);
             if (card == null) return null;
-            var cardUser = await _context.Cards.Where(data => data.UserID == id).ToListAsync();
+            var cardUser = await _context.Cards.Where(data => data.UserID == id && data.TransactionCard != card.TransactionCard).ToListAsync();
             if (cardUser == null) return null;
+            if (cardUser.Count == 0) return null;
 
             var cardFilter = cardUser.Where(data => data.TypeMoney == card.TypeMoney).FirstOrDefault() ?? cardUser.FirstOrDefault(); // Если карта не найдена по нашей валюте, то предложим перевод на другие валюты
             if (cardFilter == null) return null;
@@ -115,8 +128,10 @@ namespace ZaitsevBankAPI.Services
             string cardNumber = numberCard.Trim();
             var card = await _context.Cards.FirstOrDefaultAsync(y => y.NumberCard == cardNumber);
             if (card == null) return null;
-            var cardUser = await _context.Cards.Where(data => data.UserID == id).ToListAsync();
+            var cardUser = await _context.Cards.Where(data => data.UserID == id && data.TransactionCard != card.TransactionCard).ToListAsync(); //&& card.TransactionCard != card.TransactionCard Дополнительная проверка на карту
             if (cardUser == null) return null;
+            if (cardUser.Count == 0) return null;
+
             var user = await _context.Users.FindAsync(card.UserID);
             if (user == null) return null;
 

@@ -13,7 +13,8 @@
             PaymentServices = 6, // Оплата услуг
             ActivationCard = 7, // Активация карты
             DeActivationCard = 8, // Деактивация карты по сроку
-            BetweenMyCards = 9
+            BetweenMyCards = 9,
+            ReturnMoney = 10
         }
         public static string getNameOperation(OperationNumber Operation)
         {
@@ -29,6 +30,7 @@
                 OperationNumber.ActivationCard => "Активация карты",
                 OperationNumber.DeActivationCard => "Деактивация карты по сроку",
                 OperationNumber.BetweenMyCards => "Между своими счетами",
+                OperationNumber.ReturnMoney => "Возврат средств",
                 _ => "Не найден тип операции",
             };
         }
