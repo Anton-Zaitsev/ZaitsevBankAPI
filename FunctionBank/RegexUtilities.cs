@@ -28,11 +28,11 @@ namespace ZaitsevBankAPI.FunctionBank
                     return match.Groups[1].Value + domainName;
                 }
             }
-            catch (RegexMatchTimeoutException e)
+            catch (RegexMatchTimeoutException)
             {
                 return false;
             }
-            catch (ArgumentException e)
+            catch (ArgumentException)
             {
                 return false;
             }
@@ -59,7 +59,7 @@ namespace ZaitsevBankAPI.FunctionBank
         public static string PhoneNumber(string value)
         {
             if (string.IsNullOrEmpty(value)) return string.Empty;
-            value = new System.Text.RegularExpressions.Regex(@"\D")
+            value = new Regex(@"\D")
                 .Replace(value, string.Empty);
             value = value.TrimStart('1');
             if (value.Length == 7)
