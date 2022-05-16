@@ -17,11 +17,9 @@ namespace ZaitsevBankAPI.Models.TransactionsModels
         public string ValuteA { get; set; }
         [Required]
         public string ValuteB { get; set; }
-        [Required]
-        public double ActualCurse { get; set; }
 
         [Required]
-        public double CountValute { get; set; }
+        public double ActualCurseRub { get; set; }
 
         public virtual Transactions Transactions { get; set; }
     }

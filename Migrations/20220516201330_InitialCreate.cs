@@ -76,7 +76,8 @@ namespace ZaitsevBankAPI.Migrations
                     NameSender = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NameRecipient = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserSender = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserRecipient = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    UserRecipient = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CurrencyTransferID = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -143,8 +144,7 @@ namespace ZaitsevBankAPI.Migrations
                     TransactionCard = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ValuteA = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ValuteB = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ActualCurse = table.Column<double>(type: "float", nullable: false),
-                    CountValute = table.Column<double>(type: "float", nullable: false)
+                    ActualCurseRub = table.Column<double>(type: "float", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -166,6 +166,7 @@ namespace ZaitsevBankAPI.Migrations
                     DebitCard = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     NameServices = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CorrespondentScore = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Payment = table.Column<bool>(type: "bit", nullable: true)
                 },
                 constraints: table =>

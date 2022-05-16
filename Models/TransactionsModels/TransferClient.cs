@@ -22,6 +22,7 @@ namespace ZaitsevBankAPI.Models.TransactionsModels
         [Required]
         public Guid UserRecipient { get; set; }
 
+        public Guid? CurrencyTransferID { get; set; }// Если перевод между валютами был
         public virtual ICollection<Transactions> Transactions { get; set; }  
     }
 }

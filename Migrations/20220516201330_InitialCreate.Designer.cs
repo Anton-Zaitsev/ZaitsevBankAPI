@@ -12,7 +12,7 @@ using ZaitsevBankAPI;
 namespace ZaitsevBankAPI.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20220509010836_InitialCreate")]
+    [Migration("20220516201330_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -137,10 +137,7 @@ namespace ZaitsevBankAPI.Migrations
                     b.Property<Guid>("TransactionsID")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("ActualCurse")
-                        .HasColumnType("float");
-
-                    b.Property<double>("CountValute")
+                    b.Property<double>("ActualCurseRub")
                         .HasColumnType("float");
 
                     b.Property<int>("NumberDocument")
@@ -169,6 +166,10 @@ namespace ZaitsevBankAPI.Migrations
                 {
                     b.Property<Guid>("TransactionsID")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CorrespondentScore")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("DebitCard")
                         .HasColumnType("uniqueidentifier");
@@ -236,6 +237,9 @@ namespace ZaitsevBankAPI.Migrations
                 {
                     b.Property<Guid>("TransactionsID")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CurrencyTransferID")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("NameRecipient")
