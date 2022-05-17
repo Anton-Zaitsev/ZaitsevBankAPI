@@ -166,7 +166,7 @@ namespace ZaitsevBankAPI.Migrations
                     DebitCard = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     NameServices = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CorrespondentScore = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CorrespondentScore = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Payment = table.Column<bool>(type: "bit", nullable: true)
                 },
                 constraints: table =>

@@ -166,7 +166,6 @@ namespace ZaitsevBankAPI.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CorrespondentScore")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("DebitCard")

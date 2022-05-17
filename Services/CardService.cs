@@ -15,6 +15,9 @@ namespace ZaitsevBankAPI.Services
         }
         public async Task<bool> CreateCard(string userID, string cardOperator,string nameCard, string typeMoney)
         {
+            UserService userService = new();
+            if (await userService.CheckUserFind(userID) == false) return false; 
+
             CreditCard creditCard = new();
             var numberCard = creditCard.generateCardNumber(cardOperator);
             if (numberCard == null) return false;

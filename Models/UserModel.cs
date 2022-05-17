@@ -23,4 +23,5 @@ namespace ZaitsevBankAPI.Models
         public string Phone { get; set; }
 
     }
+ 
 }

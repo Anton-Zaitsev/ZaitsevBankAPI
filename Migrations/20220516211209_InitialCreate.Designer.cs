@@ -12,7 +12,7 @@ using ZaitsevBankAPI;
 namespace ZaitsevBankAPI.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20220516201330_InitialCreate")]
+    [Migration("20220516211209_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -168,7 +168,6 @@ namespace ZaitsevBankAPI.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CorrespondentScore")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("DebitCard")

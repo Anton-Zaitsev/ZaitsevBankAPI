@@ -12,20 +12,24 @@ namespace ZaitsevBankAPI.Services
             _context = new();
         }
 
-        public async Task<UserModel?> SignIn(string login, string password)
+        public async Task<SignUserModel?> SignIn(string login, string password)
         {
             string password_sha256 = EncryptionBank.sha256(password);
             var user = await _context.Users.FirstOrDefaultAsync(user => user.Login == login && user.Password == password_sha256);
             if (user == null) return null;
-            return user;
+            return new SignUserModel { NameUser = user.FirstName, UserID = user.UserID };
         }
-
+        public async Task<bool> CheckUserFind(string userID)
+        {
+            var id = Guid.Parse(userID);
+            return  await _context.Users.FindAsync(id) != null;
+        }
         public async Task<UserModel?> GetUserData(string userID)
         {
             var id = Guid.Parse(userID);
             return await _context.Users.FindAsync(id);
         }
-        public async Task<UserModel?> CreateAccount(string Login, string Password, string Phone, string FirstName, string LastName, string? MiddleName, string Birthday, string Gender, string ip = "")
+        public async Task<SignUserModel?> CreateAccount(string Login, string Password, string Phone, string FirstName, string LastName, string? MiddleName, string Birthday, string Gender, string ip = "")
         {
             var data = await _context.Users.Where(user => user.Login == Login || user.Phone == Phone).ToListAsync();
             if (data.Count == 0)
@@ -44,7 +48,7 @@ namespace ZaitsevBankAPI.Services
 
                 await _context.Users.AddAsync(user);
                 await _context.SaveChangesAsync();
-                return user;
+                return new SignUserModel { NameUser = user.FirstName, UserID = user.UserID };
             }
             else
             {

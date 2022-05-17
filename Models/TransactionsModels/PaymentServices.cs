@@ -16,7 +16,7 @@ namespace ZaitsevBankAPI.Models.TransactionsModels
         [Required]
         public string NameServices { get; set; }
 
-        public string CorrespondentScore { get; set; } // Специальный счет для организаций которые оплачивают вам
+        public string? CorrespondentScore { get; set; } // Специальный счет для организаций которые оплачивают вам
         public bool? Payment { get; set; } // Покупка или прибыль
         public virtual Transactions Transactions { get; set; }
     }
