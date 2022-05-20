@@ -16,8 +16,12 @@ namespace ZaitsevBankAPI.Models.TransactionsModels
         [Required]
         public string NameServices { get; set; }
 
+        //public Guid? CurrencyTransferID { get; set; }// Если перевод между валютами был
+
         public string? CorrespondentScore { get; set; } // Специальный счет для организаций которые оплачивают вам
+
         public bool? Payment { get; set; } // Покупка или прибыль
+
         public virtual Transactions Transactions { get; set; }
     }
 }

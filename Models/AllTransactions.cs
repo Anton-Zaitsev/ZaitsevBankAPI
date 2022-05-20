@@ -35,12 +35,13 @@
         // Внизу могут быть nil, потому что может быть транзакция на перевод валюту, тогда они не нужны
         public double? CountValute { get; set; } 
 
-        public string? ValuteType { get; set; }
+        public string? ValuteType { get; set; } // Так же может быть опущен, так как на транзакцию перевода валюты он не играет роли
         public TransactionValute? TransactionValute { get; set; }
     }
 
     public class TransactionValute // Перевод валюты 
     {
+        public bool BuySale { get; set; } // true покупка и false продажа
         public string ValuteA { get; set; } // Из валюты А
         public string ValuteB { get; set; } // В валюту B
 
@@ -55,13 +56,15 @@
         public bool Activation { get; set; } // true Если Успешно активирована, false если заблокирована
     }
 
-    public class TransactionPaymentServices // Оплата товаров или услуг
+    public class TransactionPaymentServices // Оплата товаров или услуг и перевод валюты
     {
         public string NameClient { get; set; }
 
         public double CountMoney { get; set; }
 
         public string ValuteType { get; set; }
+
+        public TransactionValute? TransactionValute { get; set; }
 
     }
 

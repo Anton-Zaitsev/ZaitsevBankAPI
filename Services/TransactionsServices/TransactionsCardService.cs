@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ZaitsevBankAPI.FunctionBank;
-using ZaitsevBankAPI.Models;
 using ZaitsevBankAPI.Models.TransactionsModels;
-using static ZaitsevBankAPI.FunctionBank.Operation;
 
 namespace ZaitsevBankAPI.Services.TransactionsServices
 {
@@ -13,38 +11,7 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
         {
             _context = new();
         }
-        public async Task<List<AllTransactions>?> GetAllCardsTransactions(DateTime dateIN, DateTime dateFrom,Guid userID)
-        {
-            int operationActivationCard = (int)OperationNumber.ActivationCard;
-            int operationDeActivationCard = (int)OperationNumber.DeActivationCard;
-
-            List<AllTransactions> list = new();
-            var getTransaction = await _context.PaymentServices.Include(x => x.Transactions).Where(x => x.UserID == userID
-            && (x.Transactions.CodeOperation == operationActivationCard || x.Transactions.CodeOperation == operationDeActivationCard) 
-            && (x.Transactions.ArrivalDate >= dateIN || x.Transactions.ArrivalDate <= dateFrom)).ToListAsync();
-            if (getTransaction.Count == 0) return null;
-
-            foreach (PaymentServices transaction in getTransaction)
-            {
-                TransactionCardOrCredit transactionCard = new()
-                {
-                    Name = transaction.NameServices,
-                    Activation = operationActivationCard == transaction.Transactions.CodeOperation
-                };
-                AllTransactions allTransactions = new()
-                {
-                    TypeTransaction = transaction.Transactions.CodeOperation,
-                    NameTransaction = transaction.Transactions.NameOperation,
-                    DateTime = transaction.Transactions.ArrivalDate.Value,
-                    TransactionId = transaction.TransactionsID,
-                    TransactionCardOrCredit = transactionCard
-
-                };
-                list.Add(allTransactions);
-            }
-            GC.Collect();
-            return list;
-        }
+        
         public async Task CreateCard(Guid UserID, Guid DebitCard, string CardInfo)
         {
             Operation.OperationNumber activationCard = Operation.OperationNumber.ActivationCard;

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
+using ZaitsevBankAPI.Models;
 using ZaitsevBankAPI.Services.TransactionsServices;
 
 namespace ZaitsevBankAPI.Controllers
@@ -42,12 +44,14 @@ namespace ZaitsevBankAPI.Controllers
         public async Task<IActionResult> GetAllTransaction(string userID)
         {
             Guid id = Guid.Parse(userID);
-            TransactionsCardService transactionsCardService = new();
+            TransactionsGetList transactionsGetList = new();
             DateTime dateTime2 = DateTime.Now;
             DateTime dateTime1 = dateTime2.AddMonths(-1);
 
-            var list = await transactionsCardService.GetAllCardsTransactions(dateTime1, dateTime2, id);
-            return list != null ? Ok(list) : NotFound();
+            Task<List<AllTransactions>?> getCardTransaction = transactionsGetList.GetAllCardsTransactions(dateTime1, dateTime2, id);
+            Task<List<AllTransactions>?> getTransferTransaction = transactionsGetList.GetAllTransferTransactions(dateTime1, dateTime2, id);
+            await Task.WhenAll(getCardTransaction, getTransferTransaction);
+            return getCardTransaction.Result != null ? Ok(getCardTransaction.Result) : NotFound();
         }
 
     }

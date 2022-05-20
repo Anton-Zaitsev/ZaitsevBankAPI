@@ -14,7 +14,11 @@
             ActivationCard = 7, // Активация карты
             DeActivationCard = 8, // Деактивация карты по сроку
             BetweenMyCards = 9, //Между своими счетами
-            ReturnMoney = 10 //Возврат средств
+            ReturnMoney = 10, //Возврат средств
+            IncomingTransferAndCurrencyTransfer = 11, //Входящий перевод с переводом валюты
+            OutgoingTransferAndCurrencyTransfer = 12, //Исходящий перевод с переводом валюты
+            BetweenMyCardsAndCurrencyTransfer = 13, //Между своими счетами с переводом валюты
+            PaymentServicesAndCurrencyTransfer = 14 //Оплата услуг с переводом валюты
         }
         public static string getNameOperation(OperationNumber Operation)
         {
