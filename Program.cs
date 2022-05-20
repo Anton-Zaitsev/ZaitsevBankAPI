@@ -9,7 +9,7 @@ builder.Services.AddDbContext<ApplicationContext>();
 builder.Services.AddControllersWithViews();
 builder.Services.AddMvc();
 
-builder.Services.AddHostedService<ExchangeBackroungUpdateService>(); //Автоматическое обновление Валют
+builder.Services.AddHostedService<ZaitsevBankBackroungUpdateService>(); //Автоматическое обновление Валют и закрытие карт
 
 builder.Services.AddEndpointsApiExplorer();
 

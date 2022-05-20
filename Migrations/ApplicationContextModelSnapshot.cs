@@ -17,7 +17,7 @@ namespace ZaitsevBankAPI.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.3")
+                .HasAnnotation("ProductVersion", "6.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -137,6 +137,9 @@ namespace ZaitsevBankAPI.Migrations
 
                     b.Property<double>("ActualCurseRub")
                         .HasColumnType("float");
+
+                    b.Property<bool>("BuySaleValute")
+                        .HasColumnType("bit");
 
                     b.Property<int>("NumberDocument")
                         .HasColumnType("int");

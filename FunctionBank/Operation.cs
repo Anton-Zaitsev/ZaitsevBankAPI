@@ -13,8 +13,8 @@
             PaymentServices = 6, // Оплата услуг
             ActivationCard = 7, // Активация карты
             DeActivationCard = 8, // Деактивация карты по сроку
-            BetweenMyCards = 9,
-            ReturnMoney = 10
+            BetweenMyCards = 9, //Между своими счетами
+            ReturnMoney = 10 //Возврат средств
         }
         public static string getNameOperation(OperationNumber Operation)
         {

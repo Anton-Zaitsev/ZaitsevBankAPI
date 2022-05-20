@@ -17,6 +17,8 @@ namespace ZaitsevBankAPI.Models.TransactionsModels
         public string ValuteA { get; set; }
         [Required]
         public string ValuteB { get; set; }
+        [Required]
+        public bool BuySaleValute { get; set; } = true; // Дефолт покупка в банке валюты
 
         [Required]
         public double ActualCurseRub { get; set; }

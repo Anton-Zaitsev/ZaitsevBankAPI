@@ -2,11 +2,11 @@
 
 namespace ZaitsevBankAPI.Services
 {
-    public class ExchangeBackroungUpdateService : BackgroundService
+    public class ZaitsevBankBackroungUpdateService : BackgroundService
     {
         private readonly ILogger _logger;
 
-        public ExchangeBackroungUpdateService(ILogger<ExchangeBackroungUpdateService> logger)
+        public ZaitsevBankBackroungUpdateService(ILogger<ZaitsevBankBackroungUpdateService> logger)
         {
             _logger = logger;
         }
@@ -17,16 +17,18 @@ namespace ZaitsevBankAPI.Services
                 try
                 {
                     Thread.CurrentThread.CurrentCulture = new CultureInfo("ru-RU");
-                    ExchangesService exchangesService = new();
-                    _ = await exchangesService.ExchangesUpdate();
+                    Task<bool> task1 = new ExchangesService().ExchangesUpdate();
+                    Task task2 = new TransactionsServices.TransactionsCardService().ClosedCards();
+                    await Task.WhenAll(task1, task2);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
-                    _logger.LogError("ExchangeBackroungUpdateService/ExecuteAsync",e.Message);
+                    _logger.LogError("ZaitsevBankBackroungUpdateService/ExecuteAsync", e.Message);
                 }
 
                 await Task.Delay(21600000, stoppingToken); // Обновление раз в 6 часов
             }
         }
+    
     }
 }

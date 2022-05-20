@@ -12,14 +12,14 @@ using ZaitsevBankAPI;
 namespace ZaitsevBankAPI.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20220516211209_InitialCreate")]
+    [Migration("20220518213234_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.3")
+                .HasAnnotation("ProductVersion", "6.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -139,6 +139,9 @@ namespace ZaitsevBankAPI.Migrations
 
                     b.Property<double>("ActualCurseRub")
                         .HasColumnType("float");
+
+                    b.Property<bool>("BuySaleValute")
+                        .HasColumnType("bit");
 
                     b.Property<int>("NumberDocument")
                         .HasColumnType("int");

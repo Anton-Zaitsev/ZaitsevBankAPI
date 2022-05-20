@@ -144,6 +144,7 @@ namespace ZaitsevBankAPI.Migrations
                     TransactionCard = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ValuteA = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ValuteB = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    BuySaleValute = table.Column<bool>(type: "bit", nullable: false),
                     ActualCurseRub = table.Column<double>(type: "float", nullable: false)
                 },
                 constraints: table =>

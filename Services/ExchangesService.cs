@@ -33,7 +33,7 @@ namespace ZaitsevBankAPI.Services
                 if (data == null) return null;
                 return data.ValuteConvert;
             }
-            else if (ValuteA != "RUB" && creditCard.isElectronValute(ValuteA) == false && ValuteB == "RUB")
+            else if (ValuteA != "RUB" && ValuteB == "RUB" && creditCard.isElectronValute(ValuteA) == false)
             {
                 var data = await ValuteATOValuteB(ValuteA, ValuteB, BuySale, 1);
                 if (data == null) return null;
@@ -54,12 +54,15 @@ namespace ZaitsevBankAPI.Services
                 }
                 else if (creditCard.isElectronValute(ValuteA) == false && creditCard.isElectronValute(ValuteB)) // Например 100 евро в 1 Биток
                 {
+                    if (ValuteA == "RUB") return data.ValuteConvert;
                     var valuteA = await _context.Exchanges.FirstOrDefaultAsync(valute => valute.CharCode == ValuteA);
                     if (valuteA == null) return null;
                     return data.ValuteConvert * valuteA.ValuteBuy;
+                    
                 }
                 else if (creditCard.isElectronValute(ValuteA) && creditCard.isElectronValute(ValuteB) == false) // Например 1 биток в евро
                 {
+                    if (ValuteB == "RUB") return data.ValuteConvert;
                     var valuteB = await _context.Exchanges.FirstOrDefaultAsync(valute => valute.CharCode == ValuteB); 
                     if (valuteB == null) return null;
                     return data.ValuteConvert * valuteB.ValuteBuy;

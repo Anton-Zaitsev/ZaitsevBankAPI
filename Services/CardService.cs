@@ -45,7 +45,7 @@ namespace ZaitsevBankAPI.Services
             await _context.Cards.AddAsync(card);
             await _context.SaveChangesAsync();
             string infoCard = nameCard + " •• " + numberCard.Substring(numberCard.Length - 4);
-            await new TransactionsServices.TransactionsService().CreateCard(id, transationCardID, infoCard);
+            await new TransactionsServices.TransactionsCardService().CreateCard(id, transationCardID, infoCard);
             return true;
         }
         
@@ -54,21 +54,7 @@ namespace ZaitsevBankAPI.Services
             Guid id = Guid.Parse(userID);
             var Cards = await _context.Cards.Where(data => data.UserID == id).ToListAsync();
             if (Cards == null) return null;
-            if (Cards.Count == 0) return null;
-
-            /*
-            DateTime time = DateTime.Now;
-            bool creditClosed = false;
-            for(int i = 0; i < Cards.Count; i++)
-            {
-                if (Cards[i].DataClosedCard <= time) // Если дейсвительность карты меньше или равно текущему времени, то закрываем карту!
-                {
-                    Cards[i].ClosedCard = true;
-                    creditClosed = true;
-                }
-            }
-            if (creditClosed) await _context.SaveChangesAsync();
-            */
+            if (Cards.Count == 0) return null;    
             return Cards;
         }
 
