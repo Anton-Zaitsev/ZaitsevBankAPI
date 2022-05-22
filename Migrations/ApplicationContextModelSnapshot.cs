@@ -144,7 +144,10 @@ namespace ZaitsevBankAPI.Migrations
                     b.Property<int>("NumberDocument")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("TransactionCard")
+                    b.Property<Guid>("TransactionCardFrom")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TransactionCardTo")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserID")
@@ -170,6 +173,9 @@ namespace ZaitsevBankAPI.Migrations
 
                     b.Property<string>("CorrespondentScore")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("CurrencyTransferID")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("DebitCard")
                         .HasColumnType("uniqueidentifier");
@@ -202,7 +208,6 @@ namespace ZaitsevBankAPI.Migrations
                         .HasColumnType("float");
 
                     b.Property<DateTime?>("ArrivalDate")
-                        .IsRequired()
                         .HasColumnType("datetime2");
 
                     b.Property<int>("CodeOperation")
@@ -223,6 +228,9 @@ namespace ZaitsevBankAPI.Migrations
 
                     b.Property<Guid?>("TransferClientTransactionsID")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ValuteTransactions")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("TransactionsID");
 

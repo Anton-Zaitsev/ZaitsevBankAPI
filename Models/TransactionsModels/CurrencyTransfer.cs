@@ -12,7 +12,9 @@ namespace ZaitsevBankAPI.Models.TransactionsModels
         [Required]
         public int NumberDocument { get; set; }
         [Required]
-        public Guid TransactionCard { get; set; }
+        public Guid TransactionCardFrom { get; set; }
+        [Required]
+        public Guid TransactionCardTo { get; set; }
         [Required]
         public string ValuteA { get; set; }
         [Required]

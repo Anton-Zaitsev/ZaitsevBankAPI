@@ -37,9 +37,26 @@ namespace ZaitsevBankAPI.Controllers
         public async Task<IActionResult> GetTransaction(string userID)
         {
             TransactionsTransferService transactionsService = new();
-            bool completed = await transactionsService.GetTransaction(userID);
+            bool completed = true;
             return completed ? Ok() : StatusCode(412, "Не удалось создать вашу карту");
         }
+
+        [HttpPost]
+        public async Task<IActionResult> ApplyCredit(string count, string transactionCard)
+        {
+            TransactionCreditService transactionCreditService = new();
+            var completed = await transactionCreditService.ApplyCredit(count, transactionCard);
+            return completed ? Ok() : StatusCode(412, "Не оформить кредит");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddMoneyCredit(string count, string transactionCard,string creditID)
+        {
+            TransactionCreditService transactionCreditService = new();
+            var completed = await transactionCreditService.AddMoneyCredit(count, transactionCard, creditID);
+            return completed ? Ok() : StatusCode(412, "Не оформить кредит");
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAllTransaction(string userID)
         {
@@ -48,10 +65,23 @@ namespace ZaitsevBankAPI.Controllers
             DateTime dateTime2 = DateTime.Now;
             DateTime dateTime1 = dateTime2.AddMonths(-1);
 
-            Task<List<AllTransactions>?> getCardTransaction = transactionsGetList.GetAllCardsTransactions(dateTime1, dateTime2, id);
-            Task<List<AllTransactions>?> getTransferTransaction = transactionsGetList.GetAllTransferTransactions(dateTime1, dateTime2, id);
-            await Task.WhenAll(getCardTransaction, getTransferTransaction);
-            return getCardTransaction.Result != null ? Ok(getCardTransaction.Result) : NotFound();
+            List<Task<List<AllTransactions>?>> listTask = new();
+
+            listTask.Add(transactionsGetList.GetAllCardsTransactions(dateTime1, dateTime2, id));
+            listTask.Add(transactionsGetList.GetAllTransferTransactions(dateTime1, dateTime2, id));
+            listTask.Add(transactionsGetList.GetAllCreditsTransaction(dateTime1, dateTime2, id));
+            listTask.Add(transactionsGetList.GetAllCurrencyTransaction(dateTime1, dateTime2, id));
+            await Task.WhenAll(listTask);
+
+            List<AllTransactions> allTransactions = new();
+            foreach (Task<List<AllTransactions>?>? task in listTask)
+            {
+                if (task.Result != null)
+                {
+                    allTransactions.AddRange(task.Result);  
+                }
+            }
+            return allTransactions.Count > 0 ? Ok(allTransactions) : NotFound();
         }
 
     }

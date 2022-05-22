@@ -45,7 +45,7 @@ namespace ZaitsevBankAPI.Services
             await _context.Cards.AddAsync(card);
             await _context.SaveChangesAsync();
             string infoCard = nameCard + " •• " + numberCard.Substring(numberCard.Length - 4);
-            await new TransactionsServices.TransactionsCardService().CreateCard(id, transationCardID, infoCard);
+            await new TransactionsServices.TransactionsCardService().CreateCard(id, transationCardID, infoCard, typeMoney);
             return true;
         }
         

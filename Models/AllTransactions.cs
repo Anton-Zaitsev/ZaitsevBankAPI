@@ -17,13 +17,13 @@
         public TransactionCredit? TransactionCredit { get; set; } // Погащения кредита
     }
 
-    public class TransactionTransfer // Класс для входящих и исходящий переводов
+    public class TransactionTransfer // Класс для входящих и исходящий переводов 
     {  
         public bool IncomingTransfer { get; set; } // Входящяя ли транзакции, если нет, то исходящяя
 
         public TransactionPaymentServices TransactionPaymentServices { get; set; }
 
-        public TransactionValute? TransactionValute { get; set; } // Была ли транзакция на перевод валюты 
+        //public TransactionValute? TransactionValute { get; set; } // Была ли транзакция на перевод валюты 
 
     }
 
@@ -70,7 +70,7 @@
 
     public class TransactionCredit
     {
-        public string NameClient { get; set; }
+        public string NumberDocument { get; set; }
 
         public double CountMoney { get; set; }
 

@@ -26,7 +26,7 @@
             {
                 OperationNumber.IncomingTransfer => "Входящий перевод",
                 OperationNumber.OutgoingTransfer => "Клиету ZaitsevBank",
-                OperationNumber.TakeCredit => "Взятие кредита",
+                OperationNumber.TakeCredit => "Оформление кредита",
                 OperationNumber.PaymentCredit => "Оплата по кредитному договору",
                 OperationNumber.RepaymentCredit => "Погащение кредита",
                 OperationNumber.CurrencyTransfer => "Перевод валюты",

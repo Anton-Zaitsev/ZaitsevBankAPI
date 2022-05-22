@@ -22,4 +22,12 @@ namespace ZaitsevBankAPI.Models.TransactionsModels
 
         public virtual ICollection<Transactions> Transactions { get; set; }
     }
+
+    public class CreditCheck
+    {
+        public double CreditSumm { get; set; }
+
+        public int Period { get; set; } // Период в годах
+        public float Rate { get; set; } // Процентная ставка
+    }
 }

@@ -11,24 +11,13 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
         {
             _context = new();
         }
-
-        public async Task<bool> GetTransaction(string UserID)
-        {
-            Guid userID = Guid.Parse(UserID);
-            var data = await _context.CurrencyTransfers.Include(x => x.Transactions).Where(x => x.UserID == userID).ToListAsync();
-            foreach (var item in data)
-            {
-                var dataID = item.Transactions.TransactionsID;
-                string datadsfsdf = dataID.ToString();
-            }
-            return data.Count > 0;
-        }
         public async Task<bool> TransferToClient(string transactionSender, string transactionRecipient, string summ)
         {
 
             double value;
             if (double.TryParse(summ, out value))
             {
+                if (value == 0) return false;
                 Guid TransactionSender = Guid.Parse(transactionSender);
                 Guid TransactionRecipient = Guid.Parse(transactionRecipient);
                 CardService CardService = new();
@@ -68,7 +57,8 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                             NameOperation = Operation.getNameOperation(sender),
                             Arrival = 0,
                             Expenses = value,
-                            ArrivalDate = DateTime.Now
+                            ArrivalDate = DateTime.Now,
+                            ValuteTransactions = cardSender.TypeMoney
 
                         };
                         Transactions transactionsRecipient = new()
@@ -76,9 +66,9 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                             TransactionsID = Guid.NewGuid(),
                             CodeOperation = (int)recipient,
                             NameOperation = Operation.getNameOperation(recipient),
-                            Arrival = value,
                             Expenses = 0,
-                            ExpensesDate = DateTime.Now
+                            ExpensesDate = DateTime.Now,
+                            ValuteTransactions = cardRecipient.TypeMoney
                         };
 
                         TransferClient transferClient = new()
@@ -97,12 +87,13 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                         if (cardSender.TypeMoney != cardRecipient.TypeMoney)
                         {
                             TransactionsValute transactionsValute = new();
-                            var countValute = await transactionsValute.CurrencyTransferTransaction(userSender.UserID, TransactionSender, cardSender.TypeMoney, cardRecipient.TypeMoney, value);
+                            var countValute = await transactionsValute.CurrencyTransferTransaction(userSender.UserID, TransactionSender, TransactionRecipient, cardSender.TypeMoney, cardRecipient.TypeMoney, value);
                             if (countValute == null) return false;
 
                             cardSender.MoneyCard -= value;
                             cardRecipient.MoneyCard += countValute.Transactions.Arrival.Value;
 
+                            transactionsRecipient.Arrival = countValute.Transactions.Arrival.Value; // Приход с перевода валюты для карты B
                             transferClient.CurrencyTransferID = countValute.TransactionsID;
                             // Делаем транзакцию для перевода валюты
                         }
@@ -162,23 +153,30 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                         if (cardSender.TypeMoney != cardRecipient.TypeMoney)
                         {
                             TransactionsValute transactionsValute = new();
-                            var countValute = await transactionsValute.CurrencyTransferTransaction(userSender.UserID, TransactionSender, cardSender.TypeMoney, cardRecipient.TypeMoney, value);
+                            var countValute = await transactionsValute.CurrencyTransferTransaction(userSender.UserID, TransactionSender, TransactionRecipient, cardSender.TypeMoney, cardRecipient.TypeMoney, value);
                             if (countValute == null) return false;
 
                             cardSender.MoneyCard -= value;
                             cardRecipient.MoneyCard += countValute.Transactions.Arrival.Value;
 
-                            transferClient.CurrencyTransferID = countValute.TransactionsID;
-                            // Делаем транзакцию для перевода валюты
+                            transferClient.CurrencyTransferID = countValute.TransactionsID; // Добавляем корректный Transfer
+
                         }
                         else
                         {
+                            transactionsBetween.ValuteTransactions = cardSender.TypeMoney;
+
+                            transactionsBetween.Expenses = value;// Расход в валюту
+                            transactionsBetween.Arrival = value;// Приход в валюте
+
                             cardSender.MoneyCard -= value;
                             cardRecipient.MoneyCard += value;
+
                         }
 
                         cardSender.MoneyCard = Math.Round(cardSender.MoneyCard, creditCard.isElectronValute(cardSender.TypeMoney) ? 6 : 2);
                         cardRecipient.MoneyCard = Math.Round(cardRecipient.MoneyCard, creditCard.isElectronValute(cardRecipient.TypeMoney) ? 6 : 2);
+
                         _context.Cards.UpdateRange(cardSender, cardRecipient);
                         await _context.SaveChangesAsync(); // Сохраняем изменения для перевода карт
 

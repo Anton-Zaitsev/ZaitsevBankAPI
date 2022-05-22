@@ -28,7 +28,7 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
 
                 if (cardA.UserID != cardB.UserID || cardA.TypeMoney == cardB.TypeMoney) return false;
 
-                var count = await CurrencyTransferTransaction(cardA.UserID, TransactionA, cardA.TypeMoney, cardB.TypeMoney, value, BuySale);
+                var count = await CurrencyTransferTransaction(cardA.UserID, TransactionA, TransactionB, cardA.TypeMoney, cardB.TypeMoney, value, BuySale);
                 if (count == null) return false;
 
                 cardA.MoneyCard -= value;
@@ -47,7 +47,7 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                 return false;
             }
         }
-        public async Task<CurrencyTransfer?> CurrencyTransferTransaction(Guid UserID, Guid TransactionCard, string ValuteA, string ValuteB, double countValute, bool BuySale = true)
+        public async Task<CurrencyTransfer?> CurrencyTransferTransaction(Guid UserID, Guid TransactionA, Guid TransactionB, string ValuteA, string ValuteB, double countValute, bool BuySale = true)
         {
             ExchangesService exchangesService = new();
             var transformValute = await exchangesService.GetActualCurseRUB(ValuteA, ValuteB, BuySale);
@@ -76,7 +76,8 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                 TransactionsID = IDTransaction,
                 NumberDocument = new Random().Next(0, 99999),
                 UserID = UserID,
-                TransactionCard = TransactionCard,
+                TransactionCardFrom = TransactionA,
+                TransactionCardTo = TransactionB,
                 ValuteA = ValuteA,
                 ValuteB = ValuteB,
                 ActualCurseRub = transformValute.Value,

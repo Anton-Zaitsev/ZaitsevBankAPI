@@ -12,7 +12,7 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
             _context = new();
         }
         
-        public async Task CreateCard(Guid UserID, Guid DebitCard, string CardInfo)
+        public async Task CreateCard(Guid UserID, Guid DebitCard, string CardInfo,string ValuteTransactions)
         {
             Operation.OperationNumber activationCard = Operation.OperationNumber.ActivationCard;
 
@@ -22,7 +22,8 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                 TransactionsID = idTransaction,
                 CodeOperation = (int)activationCard,
                 NameOperation = Operation.getNameOperation(activationCard),
-                ArrivalDate = DateTime.Now
+                ArrivalDate = DateTime.Now,
+                ValuteTransactions = ValuteTransactions
             };
             PaymentServices activationServices = new()
             {
@@ -36,7 +37,7 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
             await _context.PaymentServices.AddAsync(activationServices);
             await _context.SaveChangesAsync();
         }
-        private PaymentServices ClosedCard(Guid UserID, Guid DebitCard, string CardInfo)
+        private PaymentServices ClosedCard(Guid UserID, Guid DebitCard, string CardInfo, string ValuteTransactions)
         {
             Operation.OperationNumber deActivationCard = Operation.OperationNumber.DeActivationCard;
 
@@ -46,7 +47,8 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                 TransactionsID = idTransaction,
                 CodeOperation = (int)deActivationCard,
                 NameOperation = Operation.getNameOperation(deActivationCard),
-                ArrivalDate = DateTime.Now
+                ArrivalDate = DateTime.Now,
+                ValuteTransactions = ValuteTransactions
             };
             PaymentServices DeactivationServices = new()
             {
@@ -67,18 +69,20 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
             DateTime time = DateTime.Now;
             bool closedOneCard = false;
             List<PaymentServices> paymentServices = new();
-            for (int i = 0; i < allCards.Count; i++)
+
+            Parallel.ForEach(allCards, (line, state, index) =>
             {
-                if (allCards[i].DataClosedCard <= time) // Если дейсвительность карты меньше или равно текущему времени, то закрываем карту!
+                if (allCards[(int)index].DataClosedCard <= time) // Если дейсвительность карты меньше или равно текущему времени, то закрываем карту!
                 {
-                    allCards[i].ClosedCard = true;
-                    string infoCard = allCards[i].NameCard + " •• " + allCards[i].NumberCard.Substring(allCards[i].NumberCard.Length - 4);
+                    allCards[(int)index].ClosedCard = true;
+                    string infoCard = allCards[(int)index].NameCard + " •• " + allCards[(int)index].NumberCard.Substring(allCards[(int)index].NumberCard.Length - 4);
                     paymentServices.Add(
-                        ClosedCard(allCards[i].UserID, allCards[i].TransactionCard, infoCard)
+                        ClosedCard(allCards[(int)index].UserID, allCards[(int)index].TransactionCard, infoCard, allCards[(int)index].TypeMoney)
                         );
                     closedOneCard = true;
-                }        
-            }
+                }
+            });
+
             if (closedOneCard)
             {
                 _context.Cards.UpdateRange(allCards);
