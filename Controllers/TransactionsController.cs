@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using ZaitsevBankAPI.Models;
 using ZaitsevBankAPI.Services.TransactionsServices;
@@ -58,19 +59,25 @@ namespace ZaitsevBankAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllTransaction(string userID)
+        public async Task<IActionResult> GetAllTransaction(string userID,string dataFrom, string dataTo)
         {
             Guid id = Guid.Parse(userID);
-            TransactionsGetList transactionsGetList = new();
-            DateTime dateTime2 = DateTime.Now;
-            DateTime dateTime1 = dateTime2.AddMonths(-1);
+            DateTime DateFrom;
+            DateTime DateTo;
+            if (!DateTime.TryParseExact(dataFrom, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateFrom)) return NotFound();
+            if (!DateTime.TryParseExact(dataTo, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTo)) return NotFound();
+            DateTo = DateTo.AddHours(23);
+            DateTo = DateTo.AddMinutes(59);
+            DateTo = DateTo.AddSeconds(59);
+            DateTo = DateTo.AddMilliseconds(999);
 
+            TransactionsGetList transactionsGetList = new();   
             List<Task<List<AllTransactions>?>> listTask = new();
 
-            listTask.Add(transactionsGetList.GetAllCardsTransactions(dateTime1, dateTime2, id));
-            listTask.Add(transactionsGetList.GetAllTransferTransactions(dateTime1, dateTime2, id));
-            listTask.Add(transactionsGetList.GetAllCreditsTransaction(dateTime1, dateTime2, id));
-            listTask.Add(transactionsGetList.GetAllCurrencyTransaction(dateTime1, dateTime2, id));
+            listTask.Add(transactionsGetList.GetAllCardsTransactions(DateFrom, DateTo, id));
+            listTask.Add(transactionsGetList.GetAllTransferTransactions(DateFrom, DateTo, id));
+            listTask.Add(transactionsGetList.GetAllCreditsTransaction(DateFrom, DateTo, id));
+            listTask.Add(transactionsGetList.GetAllCurrencyTransaction(DateFrom, DateTo, id));
             await Task.WhenAll(listTask);
 
             List<AllTransactions> allTransactions = new();

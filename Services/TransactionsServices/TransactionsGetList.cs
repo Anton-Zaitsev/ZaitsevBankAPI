@@ -84,7 +84,7 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
         {
             List<AllTransactions> list = new();
             using ApplicationContext _context = new();
-            var getTransaction = await _context.Credits.Include(x => x.TransactionCard).Where(x => x.UserID == userID && 
+            var getTransaction = await _context.Credits.Include(x => x.Transactions).Where(x => x.UserID == userID && 
             (x.Transactions.Any(y => y.ArrivalDate >= dateIN && y.ArrivalDate <= dateFrom)) == true).ToListAsync();
             if (getTransaction == null) return null;
 
@@ -122,7 +122,7 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                         {
                             NumberDocument = credit.NumberDocument.ToString(),
                             CountMoney = transaction.CodeOperation == operationRepaymentCredit ? credit.CreditSumm : transaction.Expenses.Value,
-                            Progress = transaction.CodeOperation == operationRepaymentCredit ? 1 : (float)((transaction.Expenses.Value * 100) / credit.CreditSumm) / 100
+                            Progress = transaction.CodeOperation == operationRepaymentCredit ? 1 : (float)Math.Round(((transaction.Expenses.Value * 100) / credit.CreditSumm) / 100,4)
                                 
                         };
                         AllTransactions allTransactions = new()
