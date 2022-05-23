@@ -27,10 +27,10 @@ namespace ZaitsevBankAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ValuteBuySale(string CardA, string CardB, string summ, bool BuySale)
+        public async Task<IActionResult> ValuteBuySale(string CardA, string CardB, string Summ, bool BuySale)
         {
             TransactionsValute transactionsValute = new();
-            bool completed = await transactionsValute.ValuteBuySale(CardA, CardB, summ, BuySale);
+            bool completed = await transactionsValute.ValuteBuySale(CardA, CardB, Summ, BuySale);
             return completed ? Ok() : StatusCode(412, "Не удалось купить/продать валюту");
         }
 

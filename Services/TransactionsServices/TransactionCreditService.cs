@@ -69,12 +69,27 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                 List<Transactions> list_transactions = new();
                 if (transactionsAddMoney.Count == 0)
                 {
-                    DateTime dateTime = DateTime.Now;
+                    bool payAllCredit = false;
                     if (Math.Round(value,2) >= Math.Round(credit.CreditSumm,2))
                     {
+                        value = Math.Round(value - (value - credit.CreditSumm), 2 );// Остаток, от которого надо избавиться    
+                        payAllCredit = true;
+                    }
+                    Transactions TransactionsAddMoney = new()
+                    {
+                        TransactionsID = Guid.NewGuid(),
+                        CodeOperation = (int)paymentCredit,
+                        NameOperation = Operation.getNameOperation(paymentCredit),
+                        ArrivalDate = DateTime.Now,
+                        Arrival = 0,
+                        Expenses = value,
+                        ValuteTransactions = ValuteCredit,
+                        Credits = credit
+                    };
+                    list_transactions.Add(TransactionsAddMoney);
 
-                        value = Math.Round(value - (value - credit.CreditSumm), 2 );// Остаток, от которого надо избавиться
-
+                    if (payAllCredit)
+                    {
                         Operation.OperationNumber RepaymentCredit = Operation.OperationNumber.RepaymentCredit;
 
                         Transactions TransactionsENDMoney = new()
@@ -82,25 +97,12 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                             TransactionsID = Guid.NewGuid(),
                             CodeOperation = (int)RepaymentCredit,
                             NameOperation = Operation.getNameOperation(RepaymentCredit),
-                            ArrivalDate = dateTime,
+                            ArrivalDate = DateTime.Now,
                             ValuteTransactions = ValuteCredit,
                             Credits = credit
                         };
                         list_transactions.Add(TransactionsENDMoney);
                     }
-
-                    Transactions TransactionsAddMoney = new()
-                    {
-                        TransactionsID = Guid.NewGuid(),
-                        CodeOperation = (int)paymentCredit,
-                        NameOperation = Operation.getNameOperation(paymentCredit),
-                        ArrivalDate = dateTime,
-                        Arrival = 0,
-                        Expenses = value,
-                        ValuteTransactions = ValuteCredit,
-                        Credits = credit
-                    };
-                    list_transactions.Add(TransactionsAddMoney);
                 }
                 else
                 {
@@ -109,12 +111,28 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                     {
                         count_money_paid += item.Expenses.Value; 
                     }
-                    DateTime dateTime = DateTime.Now;
+                    bool payAllCredit = false;
+ 
                     if (Math.Round(value,2) >= Math.Round(credit.CreditSumm - count_money_paid, 2))
                     {
+                        value = Math.Round(value - (value - (credit.CreditSumm - count_money_paid) ),2);// Остаток, от которого надо избавиться    
+                        payAllCredit = true;
+                    }
+                    Transactions TransactionsAddMoney = new()
+                    {
+                        TransactionsID = Guid.NewGuid(),
+                        CodeOperation = (int)paymentCredit,
+                        NameOperation = Operation.getNameOperation(paymentCredit),
+                        ArrivalDate = DateTime.Now,
+                        Arrival = 0,
+                        Expenses = value,
+                        ValuteTransactions = ValuteCredit,
+                        Credits = credit
+                    };
+                    list_transactions.Add(TransactionsAddMoney);
 
-                        value = Math.Round(value - (value - (credit.CreditSumm - count_money_paid) ),2);// Остаток, от которого надо избавиться
-
+                    if (payAllCredit)
+                    {
                         Operation.OperationNumber RepaymentCredit = Operation.OperationNumber.RepaymentCredit;
 
                         Transactions TransactionsENDMoney = new()
@@ -122,28 +140,15 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                             TransactionsID = Guid.NewGuid(),
                             CodeOperation = (int)RepaymentCredit,
                             NameOperation = Operation.getNameOperation(RepaymentCredit),
-                            ArrivalDate = dateTime,
+                            ArrivalDate = DateTime.Now,
                             ValuteTransactions = ValuteCredit,
                             Credits = credit
                         };
                         list_transactions.Add(TransactionsENDMoney);
                     }
-                    Transactions TransactionsAddMoney = new()
-                    {
-                        TransactionsID = Guid.NewGuid(),
-                        CodeOperation = (int)paymentCredit,
-                        NameOperation = Operation.getNameOperation(paymentCredit),
-                        ArrivalDate = dateTime,
-                        Arrival = 0,
-                        Expenses = value,
-                        ValuteTransactions = ValuteCredit,
-                        Credits = credit
-                    };
-                    list_transactions.Add(TransactionsAddMoney);
                 }
                 card.MoneyCard = Math.Round(card.MoneyCard - value, 2);
                 if (card.MoneyCard < 0) return false;
-                _context.Cards.Update(card);
                 await _context.Transactions.AddRangeAsync(list_transactions);
                 await _context.SaveChangesAsync();
                 return true;

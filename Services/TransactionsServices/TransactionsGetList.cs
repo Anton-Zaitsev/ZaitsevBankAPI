@@ -27,8 +27,8 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
             List<AllTransactions> list = new();
             using ApplicationContext _context = new();
             var getTransaction = await _context.CurrencyTransfers.Include(x => x.Transactions).Where(x => x.UserID == userID &&
-            x.Transactions.ArrivalDate >= dateIN  && x.Transactions.ArrivalDate <= dateIN).ToListAsync();
-            if (getTransaction == null) return null;
+            x.Transactions.ArrivalDate >= dateIN  && x.Transactions.ArrivalDate <= dateFrom).ToListAsync();
+            if (getTransaction.Count == 0) return null;
             await _context.DisposeAsync();
             List<Task<AllTransactions?>> taskTransaction = new();
 
@@ -97,11 +97,13 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                 {
                     if (transaction.CodeOperation == operationTakeCredit)
                     {
+                        string middlename = user.MiddleName == null ? "" : $"{user.MiddleName} ";
                         string lastName = user.MiddleName == null ? user.LastName : $"{user.LastName.First()}.";
+                        string nameUser = user.FirstName + " " + middlename + lastName;
 
                         TransactionPaymentServices transactionPaymentServices = new()
                         {
-                            NameClient = lastName,
+                            NameClient = nameUser,
                             CountMoney = credit.CreditSumm,
                             ValuteType = transaction.ValuteTransactions
                         };
