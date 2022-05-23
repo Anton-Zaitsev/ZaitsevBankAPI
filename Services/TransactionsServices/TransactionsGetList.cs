@@ -32,18 +32,18 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
             await _context.DisposeAsync();
             List<Task<AllTransactions?>> taskTransaction = new();
 
-            Parallel.ForEach(getTransaction, (line, state, index) =>
+            foreach (var taskGenerate in getTransaction)
             {
-                taskTransaction.Add(GenerateCurrencyTransaction(getTransaction[(int)index]));
-            });
+                taskTransaction.Add(GenerateCurrencyTransaction(taskGenerate));
+            }
             await Task.WhenAll(taskTransaction);
-            Parallel.ForEach(taskTransaction, (line, state, index) =>
+            foreach (var task in taskTransaction)
             {
-                if (taskTransaction[(int)index].Result != null)
+                if (task.Result != null)
                 {
-                    list.Add(taskTransaction[(int)index].Result);
+                    list.Add(task.Result);
                 }
-            });
+            }
             return list.Count > 0 ? list : null;
         }
         private async Task<AllTransactions?> GenerateCurrencyTransaction(CurrencyTransfer currencyTransfer)
@@ -154,19 +154,19 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
 
             List<Task<AllTransactions?>> listTask = new();
 
-            Parallel.ForEach(getTransaction, (line, state, index) =>
+            foreach (var taskGenerate in getTransaction)
             {
-                listTask.Add(GenerateTransferTransaction(getTransaction[(int)index], userID));
-            });
+                listTask.Add(GenerateTransferTransaction(taskGenerate, userID));
+            }
             await Task.WhenAll(listTask);
 
-            Parallel.ForEach(listTask, (line, state, index) =>
+            foreach (var task in listTask)
             {
-                if (listTask[(int)index].Result != null)
+                if (task.Result != null)
                 {
-                    list.Add(listTask[(int)index].Result);
+                    list.Add(task.Result);
                 }
-            });
+            }
             return list;
 
         }
@@ -183,7 +183,6 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                 {
                     TransactionPaymentServices transactionPaymentServices = new();
                     
-                    TransactionTransfer transactionTransfer = new();
 
                     if (transferClient.UserRecipient == userID) // Наш человек получатель?
                     {
@@ -194,15 +193,12 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                         transactionPaymentServices.CountMoney = listCurrentle.Arrival.Value;
                         transactionPaymentServices.ValuteType = listCurrentle.ValuteTransactions;
                         // Заполняем модель трансфера
-                        transactionTransfer.IncomingTransfer = true; // Входящая транзакция
-                        transactionTransfer.TransactionPaymentServices = transactionPaymentServices; // Добавляем транзакцию оплаты
-                        // Заполняем транзакцию 
 
                         transactions.TypeTransaction = listCurrentle.CodeOperation; 
                         transactions.NameTransaction = listCurrentle.NameOperation;
                         transactions.TransactionId = transferClient.TransactionsID;
                         transactions.DateTime = listCurrentle.ArrivalDate.Value; // Дата доставки транзакции
-                        transactions.TransactionTransfer = transactionTransfer;
+                        transactions.TransactionPaymentServices = transactionPaymentServices; // Добавляем транзакцию оплаты
                         GC.Collect();
                         return transactions;
                     }
@@ -215,15 +211,12 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                         transactionPaymentServices.CountMoney = listCurrentle.Expenses.Value;
                         transactionPaymentServices.ValuteType = listCurrentle.ValuteTransactions;
                         // Заполняем модель трансфера
-                        transactionTransfer.IncomingTransfer = false; // Исходящая транзакция
-                        transactionTransfer.TransactionPaymentServices = transactionPaymentServices; // Добавляем транзакцию оплаты
-                        // Заполняем транзакцию 
 
                         transactions.TypeTransaction = listCurrentle.CodeOperation;
                         transactions.NameTransaction = listCurrentle.NameOperation;
                         transactions.TransactionId = transferClient.TransactionsID;
                         transactions.DateTime = listCurrentle.ExpensesDate.Value; // Дата принятия валюты
-                        transactions.TransactionTransfer = transactionTransfer;
+                        transactions.TransactionPaymentServices = transactionPaymentServices;// Добавляем транзакцию оплаты
                         GC.Collect();
                         return transactions;
 
@@ -283,8 +276,6 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                     {
                         TransactionValute = transactionValute
                     };
-                    TransactionTransfer transactionTransfer = new();
-
                     if (transferClient.UserRecipient == userID) // Наш человек получатель?
                     {
                         Transactions? listCurrentle = transferClient.Transactions.FirstOrDefault(x => x.CodeOperation == operationIncomingTransfer); // Ищем входящий перевод
@@ -294,15 +285,12 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                         transactionPaymentServices.CountMoney = currencyTransaction.Transactions.Arrival.Value;
                         transactionPaymentServices.ValuteType = currencyTransaction.ValuteB;
                         // Заполняем модель трансфера
-                        transactionTransfer.IncomingTransfer = true; // Входящая транзакция
-                        transactionTransfer.TransactionPaymentServices = transactionPaymentServices; // Добавляем транзакцию оплаты
-                        // Заполняем транзакцию 
 
                         transactions.TypeTransaction = operationIncomingCurrencyTransfer; // Новый тип операции расширенный для мобильных устройств
                         transactions.NameTransaction = listCurrentle.NameOperation;
                         transactions.TransactionId = transferClient.TransactionsID;
                         transactions.DateTime = listCurrentle.ArrivalDate.Value; // Дата доставки транзакции
-                        transactions.TransactionTransfer = transactionTransfer;
+                        transactions.TransactionPaymentServices = transactionPaymentServices;
                         GC.Collect();
                         return transactions;
                     }
@@ -314,16 +302,14 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                         transactionPaymentServices.NameClient = transferClient.NameRecipient;
                         transactionPaymentServices.CountMoney = currencyTransaction.Transactions.Expenses.Value;
                         transactionPaymentServices.ValuteType = currencyTransaction.ValuteA;
-                        // Заполняем модель трансфера
-                        transactionTransfer.IncomingTransfer = false; // Исходящая транзакция
-                        transactionTransfer.TransactionPaymentServices = transactionPaymentServices; // Добавляем транзакцию оплаты
+                        // Заполняем модель трансфераы
                         // Заполняем транзакцию 
 
                         transactions.TypeTransaction = operationOutgoingCurrencyTransfer;// Новый тип операции расширенный для мобильных устройств
                         transactions.NameTransaction = listCurrentle.NameOperation;
                         transactions.TransactionId = transferClient.TransactionsID;
                         transactions.DateTime = listCurrentle.ExpensesDate.Value; // Дата принятия валюты
-                        transactions.TransactionTransfer = transactionTransfer;
+                        transactions.TransactionPaymentServices = transactionPaymentServices; // Добавляем транзакцию оплаты
                         GC.Collect();
                         return transactions;
 

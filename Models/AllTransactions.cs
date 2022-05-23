@@ -6,25 +6,14 @@
         public string NameTransaction { get; set; } // Название транзакции
         public DateTime DateTime { get; set; } // Время транзакции
         public Guid TransactionId { get; set; } // ID транзакции 
-        public TransactionTransfer? TransactionTransfer { get; set; } // Для исходящих и выходящих переводов
 
         public TransactionValuteBetween? TransactionValuteBetween { get; set; } // Между своими счетами и перевод валюты
 
         public TransactionCardOrCredit? TransactionCardOrCredit { get; set; } // Активация карты или кредита, а так же его закрытие
 
-        public TransactionPaymentServices? TransactionPaymentServices { get; set; } // Оплата товаров или услуг
+        public TransactionPaymentServices? TransactionPaymentServices { get; set; } // Оплата товаров или услуг // Для исходящих и выходящих переводов
 
         public TransactionCredit? TransactionCredit { get; set; } // Погащения кредита
-    }
-
-    public class TransactionTransfer // Класс для входящих и исходящий переводов 
-    {  
-        public bool IncomingTransfer { get; set; } // Входящяя ли транзакции, если нет, то исходящяя
-
-        public TransactionPaymentServices TransactionPaymentServices { get; set; }
-
-        //public TransactionValute? TransactionValute { get; set; } // Была ли транзакция на перевод валюты 
-
     }
 
     public class TransactionValuteBetween // Между своими счетами и перевод валюты
