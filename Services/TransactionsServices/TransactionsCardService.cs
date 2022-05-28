@@ -72,7 +72,7 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
 
             Parallel.ForEach(allCards, (line, state, index) =>
             {
-                if (allCards[(int)index].DataClosedCard <= time) // Если дейсвительность карты меньше или равно текущему времени, то закрываем карту!
+                if (allCards[(int)index].DataClosedCard <= time && allCards[(int)index].ClosedCard == false) // Если дейсвительность карты меньше или равно текущему времени, то закрываем карту!
                 {
                     allCards[(int)index].ClosedCard = true;
                     string infoCard = allCards[(int)index].NameCard + " •• " + allCards[(int)index].NumberCard.Substring(allCards[(int)index].NumberCard.Length - 4);

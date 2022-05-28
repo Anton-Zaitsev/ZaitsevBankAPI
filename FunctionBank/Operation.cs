@@ -18,7 +18,8 @@
             IncomingTransferAndCurrencyTransfer = 11, //Входящий перевод с переводом валюты
             OutgoingTransferAndCurrencyTransfer = 12, //Исходящий перевод с переводом валюты
             BetweenMyCardsAndCurrencyTransfer = 13, //Между своими счетами с переводом валюты
-            PaymentServicesAndCurrencyTransfer = 14 //Оплата услуг с переводом валюты
+            PaymentServicesAndCurrencyTransfer = 14, //Оплата услуг с переводом валюты
+            CreditPaymentExpected = 15, // Ожидается оплата по кредитному долгу
         }
         public static string getNameOperation(OperationNumber Operation)
         {
@@ -35,6 +36,7 @@
                 OperationNumber.DeActivationCard => "Деактивация карты по сроку",
                 OperationNumber.BetweenMyCards => "Между своими счетами",
                 OperationNumber.ReturnMoney => "Возврат средств",
+                OperationNumber.CreditPaymentExpected => "Ожидается оплата по кредитному долгу",
                 _ => "Не найден тип операции",
             };
         }

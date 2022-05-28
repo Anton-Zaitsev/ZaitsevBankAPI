@@ -271,10 +271,10 @@ namespace ZaitsevBankAPI.Services
                 {
                     list.Add(EUR);
                 }
-                var UAH = await _context.Exchanges.FindAsync("R01720");
-                if (UAH != null)
+                var CNY = await _context.Exchanges.FindAsync("R01375");
+                if (CNY != null)
                 {
-                    list.Add(UAH);
+                    list.Add(CNY);
                 }
             }
             return list.Count > 0 ? list : null;

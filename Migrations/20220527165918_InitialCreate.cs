@@ -40,7 +40,7 @@ namespace ZaitsevBankAPI.Migrations
                     TransactionCard = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreditSumm = table.Column<double>(type: "float", nullable: false),
                     Rate = table.Column<float>(type: "real", nullable: false),
-                    Period = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Period = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

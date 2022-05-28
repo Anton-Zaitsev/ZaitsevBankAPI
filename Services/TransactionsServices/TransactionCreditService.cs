@@ -11,37 +11,92 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
         {
             _context = new();
         }
-        private readonly int default_interpreter = 4; // Понижение процентной ставки, если сумма превышает текущую в 4 раза
-        private readonly int max_interpreter = 16; // Максимальное количество превышения
-        private readonly int Persernt = 7;
-        private readonly int Year = 5; // На 5 лет дефолт
-        private readonly int SummCreditFromPersent = 1200000;
-        private readonly string ValuteCredit = "RUB";
 
-        public CreditCheck? creditCheck(string count)
+        private readonly static double stavkaCB = 14; // Ставка ЦБ
+        private readonly double stavkaZaitsevBank = stavkaCB + 7; // Ставка ZaitsevBank
+        private readonly float summMin = 60000; // Минимальная сумма кредита
+        private readonly float summMax = 4500000;  // Максимальная сумма кредита
+        private readonly float summMinStavka = 2000000; // Сумма при которой уменьшиться процентная ставка
+        private readonly double MinStavkaZaitsevBank = stavkaCB + 3.5; // Минимальная ставка
+        private readonly int yearMin = 1; // Минимальное количество которое берет кредит
+        private readonly int yearMax = 7; // Максимальное количество, которое берет кредит
+        private readonly string ValuteCredit = "RUB"; // Кредитная валюта
+
+        // ----------------------------- ФУНКЦИИ И МЕТОДЫ РАСЧЕТА ------------------------------
+
+        // Функция расчета платежа по кредиту где 
+        private double GetPay (double S, double i, int n)
+        {
+            double result = S * (i + i / (Math.Pow(1 + i, n) - 1));
+            return result;
+        }
+
+        // Функция расчета суммы процентов а платеже
+        private double GetPercentPay(double Sn, double i)
+        {
+            return Sn * i;
+        }
+
+        // Функция расчета суммы остатка по кредиту
+        private double GetLast(double Sn, double P, double P1)
+        {
+            return Sn - (P - P1);
+        }
+
+
+        public CreditCheck? creditCheck(string count,string countMonthly,float? stavka = null)
         {
             double value;
+            int month;
             if (double.TryParse(count, out value))
             {
-                if (value < SummCreditFromPersent) return null;
+                if (int.TryParse(countMonthly, out month))
+                {
+                    if (value >= summMin && value <= summMax && month >= yearMin && month <= yearMax)
+                    {
 
-                int interpreter = default_interpreter;
-                int year = Year;
-                int persent = Persernt;
-                while (value > SummCreditFromPersent * interpreter && interpreter <= max_interpreter)
+                        month *= 12; // Год переведим в месяца;
+
+                        CreditCheck credit = new();
+                        credit.monthCredit = month;
+                        credit.summCredit = value;
+                        credit.persent = stavka == null ? (value >= summMinStavka ? MinStavkaZaitsevBank : stavkaZaitsevBank) : stavka.Value;
+
+                        // S - остаточная стоимость кредита
+                        // i - 1/12 годовой процентной ставки
+                        // n - срок выплат
+                        // P - сумма платежа
+                        // P1 - сумма процентов в платеже 
+                        double P = 0, P1 = 0, Sn = value;
+                        List<PaymentsCredit> paymentsCredits = new();
+                        double monthPersent = (credit.persent / 12) / 100;
+                        for (int i = 0; i < month; i++)
+                        {
+                            P = Math.Round(GetPay(Sn, monthPersent, month - i), 2);
+                            P1 = Math.Round(GetPercentPay(Sn, monthPersent), 2);
+                            Sn = Math.Round(GetLast(Sn, P, P1));
+                            PaymentsCredit p = new PaymentsCredit { 
+                                month = i + 1, 
+                                pay = i == month - 1 ? paymentsCredits[i - 1].lastSumm : P, 
+                                percents = P1, 
+                                lastSumm = Sn
+                            };
+                            paymentsCredits.Add(p);
+                            credit.overPayment += (float)P1;
+                        }
+                        credit.monthlyPayment = (float)paymentsCredits[0].pay;
+                        credit.paymentsCredits = paymentsCredits;
+                        return credit;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                else
                 {
-                    year--;
-                    persent--;
-                    interpreter += default_interpreter;
-                }// Если сумма превышает дефолтную, то понижаем процентную ставку
-                double procentSumm = (value / 100) * persent;
-                double creditSumm = Math.Round(value + procentSumm,2);
-                return new CreditCheck
-                {
-                       CreditSumm = creditSumm,
-                       Period = year,
-                       Rate = persent
-                };
+                    return null;
+                }
             }
             else
             {
@@ -49,165 +104,120 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
             }
         }
 
-        public async Task<bool> AddMoneyCredit(string count, string transactionCard, string creditID)
+        public async Task<bool> AddMoneyCredit(string transactionCard, string creditID)
         {
-            double value;
-            if (double.TryParse(count, out value))
+            int typeOperationPayment = (int)Operation.OperationNumber.CreditPaymentExpected;
+            Guid TransactionCreditID = Guid.Parse(creditID);
+            // Проверяем есть ли у нас кредит и проверяем, нужно ли нам платить в этом месяце
+            var credit = await _context.Credits.Include(y => y.Transactions).FirstOrDefaultAsync(x => x.TransactionsID == TransactionCreditID 
+            && x.Transactions.Any(x => x.CodeOperation == typeOperationPayment && x.ExpensesDate.Value.Month == DateTime.Today.Month && x.ExpensesDate.Value.Year == DateTime.Today.Year));
+            if (credit == null) return false;
+
+            var creditModel = creditCheck(credit.CreditSumm.ToString(), (credit.Period / 12).ToString(), credit.Rate);
+            if (creditModel == null) return false;
+
+            var Collection = credit.Transactions.FirstOrDefault(x => x.CodeOperation == typeOperationPayment && x.ExpensesDate.Value.Month == DateTime.Today.Month && x.ExpensesDate.Value.Year == DateTime.Today.Year);
+            if (Collection == null) return false;
+            var summPay = creditModel.paymentsCredits.FirstOrDefault(x => x.lastSumm == Collection.Expenses.Value);
+            if (summPay == null) return false;
+
+            Guid TransactionCard = Guid.Parse(transactionCard);
+            var card = await _context.Cards.FirstOrDefaultAsync(x => x.TransactionCard == TransactionCard);
+            if (card == null) return false;
+            if (card.MoneyCard < summPay.pay) return false;
+
+            var transaction = await _context.Transactions.FirstOrDefaultAsync(x => x.TransactionsID == Collection.TransactionsID && x.CodeOperation == typeOperationPayment);
+            if (transaction == null) return false;
+
+            card.MoneyCard -= summPay.pay;
+            Operation.OperationNumber paymentCredit = Operation.OperationNumber.PaymentCredit;
+
+            transaction.CodeOperation = (int)paymentCredit;
+            transaction.NameOperation = Operation.getNameOperation(paymentCredit);
+            transaction.Arrival = summPay.pay;
+            transaction.ArrivalDate = DateTime.Now;
+
+            _context.Cards.Update(card);
+            _context.Transactions.Update(transaction);
+
+            if (transaction.Expenses == 0)
             {
-                Guid TransactionCreditID = Guid.Parse(creditID);
-                var credit = await _context.Credits.Include(y => y.Transactions).FirstOrDefaultAsync(x => x.TransactionsID == TransactionCreditID);
-                if (credit == null) return false;
+                Operation.OperationNumber RepaymentCredit = Operation.OperationNumber.RepaymentCredit;
 
-                Guid TransactionCard = Guid.Parse(transactionCard);
-                var card = await _context.Cards.FirstOrDefaultAsync(x => x.TransactionCard == TransactionCard);
-                if (card == null) return false;
-                if (card.MoneyCard < value) return false;
-
-                Operation.OperationNumber paymentCredit = Operation.OperationNumber.PaymentCredit;
-                var transactionsAddMoney = credit.Transactions.Where(x => x.CodeOperation == (int)paymentCredit).ToList();
-
-                List<Transactions> list_transactions = new();
-                if (transactionsAddMoney.Count == 0)
-                {
-                    bool payAllCredit = false;
-                    if (Math.Round(value,2) >= Math.Round(credit.CreditSumm,2))
-                    {
-                        value = Math.Round(value - (value - credit.CreditSumm), 2 );// Остаток, от которого надо избавиться    
-                        payAllCredit = true;
-                    }
-                    Transactions TransactionsAddMoney = new()
-                    {
-                        TransactionsID = Guid.NewGuid(),
-                        CodeOperation = (int)paymentCredit,
-                        NameOperation = Operation.getNameOperation(paymentCredit),
-                        ArrivalDate = DateTime.Now,
-                        Arrival = 0,
-                        Expenses = value,
-                        ValuteTransactions = ValuteCredit,
-                        Credits = credit
-                    };
-                    list_transactions.Add(TransactionsAddMoney);
-
-                    if (payAllCredit)
-                    {
-                        Operation.OperationNumber RepaymentCredit = Operation.OperationNumber.RepaymentCredit;
-
-                        Transactions TransactionsENDMoney = new()
-                        {
-                            TransactionsID = Guid.NewGuid(),
-                            CodeOperation = (int)RepaymentCredit,
-                            NameOperation = Operation.getNameOperation(RepaymentCredit),
-                            ArrivalDate = DateTime.Now,
-                            ValuteTransactions = ValuteCredit,
-                            Credits = credit
-                        };
-                        list_transactions.Add(TransactionsENDMoney);
-                    }
-                }
-                else
-                {
-                    double count_money_paid = 0; // Выплаченная сумма за весь период
-                    foreach (Transactions item in transactionsAddMoney)
-                    {
-                        count_money_paid += item.Expenses.Value; 
-                    }
-                    bool payAllCredit = false;
- 
-                    if (Math.Round(value,2) >= Math.Round(credit.CreditSumm - count_money_paid, 2))
-                    {
-                        value = Math.Round(value - (value - (credit.CreditSumm - count_money_paid) ),2);// Остаток, от которого надо избавиться    
-                        payAllCredit = true;
-                    }
-                    Transactions TransactionsAddMoney = new()
-                    {
-                        TransactionsID = Guid.NewGuid(),
-                        CodeOperation = (int)paymentCredit,
-                        NameOperation = Operation.getNameOperation(paymentCredit),
-                        ArrivalDate = DateTime.Now,
-                        Arrival = 0,
-                        Expenses = value,
-                        ValuteTransactions = ValuteCredit,
-                        Credits = credit
-                    };
-                    list_transactions.Add(TransactionsAddMoney);
-
-                    if (payAllCredit)
-                    {
-                        Operation.OperationNumber RepaymentCredit = Operation.OperationNumber.RepaymentCredit;
-
-                        Transactions TransactionsENDMoney = new()
-                        {
-                            TransactionsID = Guid.NewGuid(),
-                            CodeOperation = (int)RepaymentCredit,
-                            NameOperation = Operation.getNameOperation(RepaymentCredit),
-                            ArrivalDate = DateTime.Now,
-                            ValuteTransactions = ValuteCredit,
-                            Credits = credit
-                        };
-                        list_transactions.Add(TransactionsENDMoney);
-                    }
-                }
-                card.MoneyCard = Math.Round(card.MoneyCard - value, 2);
-                if (card.MoneyCard < 0) return false;
-                await _context.Transactions.AddRangeAsync(list_transactions);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        public async Task<bool> ApplyCredit(string count, string transactionCard)
-        {
-            double value;
-            if (double.TryParse(count, out value))
-            {
-                if (Math.Round(value,2) < SummCreditFromPersent) return false;
-
-                Guid TransactionCard = Guid.Parse(transactionCard);
-                var card = await _context.Cards.FirstOrDefaultAsync(x => x.TransactionCard == TransactionCard);
-                if (card == null) return false;
-                if (card.TypeMoney != ValuteCredit) return false;
-
-                var credit_check =  creditCheck(count);
-                if (creditCheck == null) return false;
-
-                Operation.OperationNumber takeCredit = Operation.OperationNumber.TakeCredit;
-                Transactions transactions = new()
+                Transactions TransactionsENDMoney = new()
                 {
                     TransactionsID = Guid.NewGuid(),
-                    CodeOperation = (int)takeCredit,
-                    NameOperation = Operation.getNameOperation(takeCredit),
+                    CodeOperation = (int)RepaymentCredit,
+                    NameOperation = Operation.getNameOperation(RepaymentCredit),
                     ArrivalDate = DateTime.Now,
-                    Arrival = Math.Round(value,2),
-                    Expenses = 0,
-                    ValuteTransactions = ValuteCredit 
+                    ValuteTransactions = ValuteCredit,
+                    Credits = credit
                 };
-                List<Transactions> list = new();
-                list.Add(transactions);
-
-                Credits credits = new()
-                {
-                    UserID = card.UserID,
-                    NumberDocument = new Random().Next(0, 99999),
-                    CreditSumm = Math.Round(credit_check.CreditSumm,2),
-                    Rate = credit_check.Rate,
-                    Period = DateTime.Now.AddYears(credit_check.Period),
-                    TransactionCard = TransactionCard,
-                    Transactions = list
-                };
-                card.MoneyCard = Math.Round(card.MoneyCard + value, 2);
-                _context.Cards.Update(card);
-                await _context.Credits.AddAsync(credits);
-                await _context.SaveChangesAsync();
-                GC.Collect();
-                return true;
+                await _context.Transactions.AddAsync(TransactionsENDMoney);
             }
-            else
-            {
-                return false;
-            }
+            await _context.SaveChangesAsync();
+            GC.Collect();
+            return true;
         }
+        public async Task<bool> ApplyCredit(string count, string year, string transactionCard)
+        {
+            var credit = creditCheck(count, year);
+            if (credit == null) return false;
+
+            Guid TransactionCard = Guid.Parse(transactionCard);
+            var card = await _context.Cards.FirstOrDefaultAsync(x => x.TransactionCard == TransactionCard);
+            if (card == null) return false;
+            if (card.TypeMoney != ValuteCredit) return false;
+
+            Operation.OperationNumber takeCredit = Operation.OperationNumber.TakeCredit;
+            Operation.OperationNumber awaitCredit = Operation.OperationNumber.CreditPaymentExpected;
+            string operation_await_text = Operation.getNameOperation(awaitCredit);
+
+            List<Transactions> list = new();
+            Transactions transactions = new()
+            {
+                TransactionsID = Guid.NewGuid(),
+                CodeOperation = (int)takeCredit,
+                NameOperation = Operation.getNameOperation(takeCredit),
+                ArrivalDate = DateTime.Now,
+                ExpensesDate = DateTime.Today.AddMonths(credit.monthCredit),
+                Arrival = credit.summCredit,
+                Expenses = 0,
+                ValuteTransactions = ValuteCredit 
+            };
+            list.Add(transactions);
+            foreach (PaymentsCredit creditMonth in credit.paymentsCredits)
+            {
+                Transactions transactionsCredit = new()
+                {
+                    TransactionsID = Guid.NewGuid(),
+                    CodeOperation = (int)awaitCredit,
+                    NameOperation = operation_await_text,
+                    ExpensesDate = DateTime.Today.AddMonths(creditMonth.month),
+                    Arrival = 0,
+                    Expenses = (double)creditMonth.lastSumm,
+                    ValuteTransactions = ValuteCredit
+                };
+                list.Add(transactionsCredit);
+            }
+            Credits credits = new()
+            {
+                UserID = card.UserID,
+                NumberDocument = new Random().Next(0, 99999),
+                CreditSumm = Math.Round(credit.summCredit),
+                Rate = (float)credit.persent,
+                Period = credit.monthCredit,
+                TransactionCard = TransactionCard,
+                Transactions = list
+            };
+            card.MoneyCard = Math.Round(card.MoneyCard + credit.summCredit, 2);
+            _context.Cards.Update(card);
+            await _context.Credits.AddAsync(credits);
+            await _context.SaveChangesAsync();
+            GC.Collect();
+            return true;
+
+        }
+                      
     }
 }

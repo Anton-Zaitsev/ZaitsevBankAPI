@@ -12,7 +12,7 @@ using ZaitsevBankAPI;
 namespace ZaitsevBankAPI.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20220522121726_InitialCreate")]
+    [Migration("20220527165918_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -115,8 +115,8 @@ namespace ZaitsevBankAPI.Migrations
                     b.Property<int>("NumberDocument")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Period")
-                        .HasColumnType("datetime2");
+                    b.Property<int>("Period")
+                        .HasColumnType("int");
 
                     b.Property<float>("Rate")
                         .HasColumnType("real");

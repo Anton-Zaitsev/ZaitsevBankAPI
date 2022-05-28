@@ -34,27 +34,27 @@ namespace ZaitsevBankAPI.Controllers
             return completed ? Ok() : StatusCode(412, "Не удалось купить/продать валюту");
         }
 
-        [HttpPost] 
-        public async Task<IActionResult> GetTransaction(string userID)
+        [HttpGet]
+        public async Task<IActionResult> CheckCredit(string count, string year)
         {
-            TransactionsTransferService transactionsService = new();
-            bool completed = true;
-            return completed ? Ok() : StatusCode(412, "Не удалось создать вашу карту");
+            TransactionCreditService transactionCreditService = new();
+            var credit = transactionCreditService.creditCheck(count, year);
+            return credit != null ? Ok(credit) : StatusCode(412, "Не оформить кредит");
         }
 
         [HttpPost]
-        public async Task<IActionResult> ApplyCredit(string count, string transactionCard)
+        public async Task<IActionResult> ApplyCredit(string count, string year, string transactionCard)
         {
             TransactionCreditService transactionCreditService = new();
-            var completed = await transactionCreditService.ApplyCredit(count, transactionCard);
+            bool completed = await transactionCreditService.ApplyCredit(count, year, transactionCard);
             return completed ? Ok() : StatusCode(412, "Не оформить кредит");
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddMoneyCredit(string count, string transactionCard,string creditID)
+        public async Task<IActionResult> AddMoneyCredit(string transactionCard,string creditID)
         {
             TransactionCreditService transactionCreditService = new();
-            var completed = await transactionCreditService.AddMoneyCredit(count, transactionCard, creditID);
+            var completed = await transactionCreditService.AddMoneyCredit(transactionCard, creditID);
             return completed ? Ok() : StatusCode(412, "Не оформить кредит");
         }
 

@@ -113,8 +113,8 @@ namespace ZaitsevBankAPI.Migrations
                     b.Property<int>("NumberDocument")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Period")
-                        .HasColumnType("datetime2");
+                    b.Property<int>("Period")
+                        .HasColumnType("int");
 
                     b.Property<float>("Rate")
                         .HasColumnType("real");

@@ -21,6 +21,7 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
         private readonly int operationTakeCredit = (int)OperationNumber.TakeCredit; // Взять кредит
         private readonly int operationPaymentCredit = (int)OperationNumber.PaymentCredit; // Оплата кредита
         private readonly int operationRepaymentCredit = (int)OperationNumber.RepaymentCredit; // Погащение кредита
+        private readonly int operationCreditPaymentExpected = (int)OperationNumber.CreditPaymentExpected; // Ожидается оплата по кредитному долгу
 
         public async Task<List<AllTransactions>?> GetAllCurrencyTransaction(DateTime dateIN, DateTime dateFrom, Guid userID)
         {
@@ -123,8 +124,8 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                         TransactionCredit transactionCredit = new()
                         {
                             NumberDocument = credit.NumberDocument.ToString(),
-                            CountMoney = transaction.CodeOperation == operationRepaymentCredit ? credit.CreditSumm : transaction.Expenses.Value,
-                            Progress = transaction.CodeOperation == operationRepaymentCredit ? 1 : (float)Math.Round(((transaction.Expenses.Value * 100) / credit.CreditSumm) / 100,4)
+                            CountMoney = transaction.CodeOperation == operationRepaymentCredit ? credit.CreditSumm : transaction.Arrival.Value,
+                            Progress = transaction.CodeOperation == operationRepaymentCredit ? 1 : (float)Math.Round((credit.CreditSumm - transaction.Expenses.Value) / credit.CreditSumm,4)
                                 
                         };
                         AllTransactions allTransactions = new()
