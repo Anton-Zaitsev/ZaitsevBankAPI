@@ -86,7 +86,7 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
             List<AllTransactions> list = new();
             using ApplicationContext _context = new();
             var getTransaction = await _context.Credits.Include(x => x.Transactions).Where(x => x.UserID == userID && 
-            (x.Transactions.Any(y => y.ArrivalDate >= dateIN && y.ArrivalDate <= dateFrom)) == true).ToListAsync();
+            (x.Transactions.Any(y => y.CodeOperation != operationCreditPaymentExpected && y.ArrivalDate >= dateIN && y.ArrivalDate <= dateFrom)) == true).ToListAsync();
             if (getTransaction == null) return null;
 
             var user = await _context.Users.FirstOrDefaultAsync(x => x.UserID == userID);

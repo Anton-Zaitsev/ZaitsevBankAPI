@@ -42,6 +42,14 @@ namespace ZaitsevBankAPI.Controllers
             return credit != null ? Ok(credit) : StatusCode(412, "Не оформить кредит");
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetListCredits(string userID, bool allList = false)
+        {
+            TransactionCreditService transactionCreditService = new();
+            var credit = await transactionCreditService.GetListCredits(userID, allList);  
+            return credit != null ? Ok(credit) : StatusCode(412, "Не оформить кредит");
+        }
+
         [HttpPost]
         public async Task<IActionResult> ApplyCredit(string count, string year, string transactionCard)
         {

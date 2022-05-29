@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ZaitsevBankAPI.FunctionBank;
+using ZaitsevBankAPI.Models;
 using ZaitsevBankAPI.Models.TransactionsModels;
 
 namespace ZaitsevBankAPI.Services.TransactionsServices
@@ -103,7 +104,121 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                 return null;
             }
         }
+        public async Task<List<CreditPay>?> GetListCredits(string userID, bool allList)
+        {
+            List<CreditPay> list = new();
+            Guid user= Guid.Parse(userID);
+            int takeCredit = (int)Operation.OperationNumber.TakeCredit;
+            int typeOperationPayment = (int)Operation.OperationNumber.CreditPaymentExpected;
+            DateTime today = DateTime.Today;
+            if (allList == false)
+            {
+                var credits = await _context.Credits.Include(y => y.Transactions).Where(x => x.UserID == user &&
+                x.Transactions.Any(g => g.CodeOperation == typeOperationPayment && g.ExpensesDate.Value.Month <= today.Month && g.ExpensesDate.Value.Year <= today.Year)).ToListAsync();
 
+                if (credits.Count == 0) return null;
+                foreach (Credits credit in credits)
+                {
+                    var creditModel = creditCheck(credit.CreditSumm.ToString(), (credit.Period / 12).ToString(), credit.Rate);
+                    if (creditModel != null) {
+
+                        var transaction_take = credit.Transactions.FirstOrDefault(x => x.CodeOperation == takeCredit);
+                        if (transaction_take != null)
+                        {
+                            CreditPay creditPay = new()
+                            {
+                                numberDocument = credit.NumberDocument.ToString(),
+                                dateCreditOffers = transaction_take.ArrivalDate.Value,
+                                dateCreditEnd = transaction_take.ExpensesDate.Value,
+                                creditPaysTransaction = new()
+                            };
+
+                            foreach (Transactions transactions in credit.Transactions)
+                            {
+                                if (transactions.CodeOperation == typeOperationPayment && transactions.ExpensesDate.Value.Month <= today.Month
+                                    && transactions.ExpensesDate.Value.Year <= today.Year) {
+
+                                    var summPay = creditModel.paymentsCredits.FirstOrDefault(x => x.lastSumm == transactions.Expenses.Value);
+                                    if (summPay != null) {
+
+                                        CreditPaysTransaction creditPaysTransaction = new()
+                                        {
+                                            overdue = transactions.ExpensesDate.Value.Month < today.Month && transactions.ExpensesDate.Value.Year <= today.Year,
+                                            datePay = transactions.ExpensesDate.Value,
+                                            summCredit = summPay.pay,
+                                            waiting = transactions.ExpensesDate.Value.Month == today.Month && transactions.ExpensesDate.Value.Year == today.Year,
+                                            balanceCredit = transactions.Expenses.Value
+                                        };
+                                        creditPay.creditPaysTransaction.Add(creditPaysTransaction);
+                                    }
+                                }
+                            }
+                            if (creditPay.creditPaysTransaction.Count > 0)
+                            {
+                                list.Add(creditPay);
+                            }
+                        }
+                    }
+                }
+                GC.Collect();
+                return list.Count > 0 ? list : null;
+
+            }
+            else
+            {
+                var credits = await _context.Credits.Include(y => y.Transactions).Where(x => x.UserID == user &&
+                x.Transactions.Any(g => g.CodeOperation == typeOperationPayment)).ToListAsync();
+                if (credits.Count == 0) return null;
+
+                foreach (Credits credit in credits)
+                {
+                    var creditModel = creditCheck(credit.CreditSumm.ToString(), (credit.Period / 12).ToString(), credit.Rate);
+                    if (creditModel != null)
+                    {
+
+                        var transaction_take = credit.Transactions.FirstOrDefault(x => x.CodeOperation == takeCredit);
+                        if (transaction_take != null)
+                        {
+                            CreditPay creditPay = new()
+                            {
+                                numberDocument = credit.NumberDocument.ToString(),
+                                dateCreditOffers = transaction_take.ArrivalDate.Value,
+                                dateCreditEnd = transaction_take.ExpensesDate.Value,
+                                creditPaysTransaction = new()
+                            };
+
+                            foreach (Transactions transactions in credit.Transactions)
+                            {
+                                if (transactions.CodeOperation == typeOperationPayment)
+                                {
+
+                                    var summPay = creditModel.paymentsCredits.FirstOrDefault(x => x.lastSumm == transactions.Expenses.Value);
+                                    if (summPay != null)
+                                    {
+
+                                        CreditPaysTransaction creditPaysTransaction = new()
+                                        {
+                                            overdue = transactions.ExpensesDate.Value.Month < today.Month && transactions.ExpensesDate.Value.Year <= today.Year,
+                                            datePay = transactions.ExpensesDate.Value,
+                                            summCredit = summPay.pay,
+                                            waiting = transactions.ExpensesDate.Value.Month == today.Month && transactions.ExpensesDate.Value.Year == today.Year,
+                                            balanceCredit = transactions.Expenses.Value
+                                        };
+                                        creditPay.creditPaysTransaction.Add(creditPaysTransaction);
+                                    }
+                                }
+                            }
+                            if (creditPay.creditPaysTransaction.Count > 0)
+                            {
+                                list.Add(creditPay);
+                            }
+                        }
+                    }
+                }
+                return list.Count > 0 ? list : null;
+            }
+
+        }
         public async Task<bool> AddMoneyCredit(string transactionCard, string creditID)
         {
             int typeOperationPayment = (int)Operation.OperationNumber.CreditPaymentExpected;
