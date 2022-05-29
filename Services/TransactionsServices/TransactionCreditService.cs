@@ -127,6 +127,7 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                         {
                             CreditPay creditPay = new()
                             {
+                                idCredit = credit.TransactionsID.ToString(),
                                 numberDocument = credit.NumberDocument.ToString(),
                                 dateCreditOffers = transaction_take.ArrivalDate.Value,
                                 dateCreditEnd = transaction_take.ExpensesDate.Value,
@@ -143,6 +144,7 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
 
                                         CreditPaysTransaction creditPaysTransaction = new()
                                         {
+                                            idTransaction = transactions.TransactionsID.ToString(),
                                             overdue = transactions.ExpensesDate.Value.Month < today.Month && transactions.ExpensesDate.Value.Year <= today.Year,
                                             datePay = transactions.ExpensesDate.Value,
                                             summCredit = summPay.pay,
@@ -181,6 +183,7 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                         {
                             CreditPay creditPay = new()
                             {
+                                idCredit = credit.TransactionsID.ToString(),
                                 numberDocument = credit.NumberDocument.ToString(),
                                 dateCreditOffers = transaction_take.ArrivalDate.Value,
                                 dateCreditEnd = transaction_take.ExpensesDate.Value,
@@ -198,6 +201,7 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
 
                                         CreditPaysTransaction creditPaysTransaction = new()
                                         {
+                                            idTransaction = transactions.TransactionsID.ToString(),
                                             overdue = transactions.ExpensesDate.Value.Month < today.Month && transactions.ExpensesDate.Value.Year <= today.Year,
                                             datePay = transactions.ExpensesDate.Value,
                                             summCredit = summPay.pay,
@@ -219,7 +223,64 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
             }
 
         }
-        public async Task<bool> AddMoneyCredit(string transactionCard, string creditID)
+        public async Task<bool> AddMoneyCreditFromTransaction(string transactionCredit, string transactionCard, string creditID)
+        {
+            int typeOperationPayment = (int)Operation.OperationNumber.CreditPaymentExpected;
+            Guid TransactionCreditID = Guid.Parse(creditID);
+            Guid TransactionCredit = Guid.Parse(transactionCredit);
+            // Проверяем есть ли у нас кредит и проверяем, нужно ли нам платить в этом месяце
+            var credit = await _context.Credits.Include(y => y.Transactions).FirstOrDefaultAsync(x => x.TransactionsID == TransactionCreditID
+            && x.Transactions.Any(x => x.CodeOperation == typeOperationPayment && x.TransactionsID == TransactionCredit));
+            if (credit == null) return false;
+
+            var creditModel = creditCheck(credit.CreditSumm.ToString(), (credit.Period / 12).ToString(), credit.Rate);
+            if (creditModel == null) return false;
+
+            var Collection = credit.Transactions.FirstOrDefault(x => x.CodeOperation == typeOperationPayment && x.TransactionsID == TransactionCredit);
+            if (Collection == null) return false;
+            var summPay = creditModel.paymentsCredits.FirstOrDefault(x => x.lastSumm == Collection.Expenses.Value);
+            if (summPay == null) return false;
+
+            Guid TransactionCard = Guid.Parse(transactionCard);
+            var card = await _context.Cards.FirstOrDefaultAsync(x => x.TransactionCard == TransactionCard);
+            if (card == null) return false;
+            if (card.MoneyCard < summPay.pay) return false;
+
+            var transaction = await _context.Transactions.FirstOrDefaultAsync(x => x.TransactionsID == Collection.TransactionsID && x.CodeOperation == typeOperationPayment);
+            if (transaction == null) return false;
+
+            card.MoneyCard -= summPay.pay;
+            Operation.OperationNumber paymentCredit = Operation.OperationNumber.PaymentCredit;
+
+            transaction.CodeOperation = (int)paymentCredit;
+            transaction.NameOperation = Operation.getNameOperation(paymentCredit);
+            transaction.Arrival = summPay.pay;
+            transaction.ArrivalDate = DateTime.Now;
+
+            _context.Cards.Update(card);
+            _context.Transactions.Update(transaction);
+
+            if (transaction.Expenses == 0)
+            {
+                Operation.OperationNumber RepaymentCredit = Operation.OperationNumber.RepaymentCredit;
+
+                Transactions TransactionsENDMoney = new()
+                {
+                    TransactionsID = Guid.NewGuid(),
+                    CodeOperation = (int)RepaymentCredit,
+                    NameOperation = Operation.getNameOperation(RepaymentCredit),
+                    ArrivalDate = DateTime.Now,
+                    ValuteTransactions = ValuteCredit,
+                    Credits = credit
+                };
+                await _context.Transactions.AddAsync(TransactionsENDMoney);
+            }
+            await _context.SaveChangesAsync();
+            GC.Collect();
+            return true;
+        }
+
+        public async Task<bool> AddMoneyCredit( string transactionCard, string creditID)
         {
             int typeOperationPayment = (int)Operation.OperationNumber.CreditPaymentExpected;
             Guid TransactionCreditID = Guid.Parse(creditID);

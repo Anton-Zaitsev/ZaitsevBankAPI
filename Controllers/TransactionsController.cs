@@ -59,10 +59,10 @@ namespace ZaitsevBankAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddMoneyCredit(string transactionCard,string creditID)
+        public async Task<IActionResult> AddMoneyCredit(string transactionCredit, string transactionCard, string creditID)
         {
             TransactionCreditService transactionCreditService = new();
-            var completed = await transactionCreditService.AddMoneyCredit(transactionCard, creditID);
+            var completed = await transactionCreditService.AddMoneyCreditFromTransaction(transactionCredit, transactionCard, creditID);
             return completed ? Ok() : StatusCode(412, "Не оформить кредит");
         }
 

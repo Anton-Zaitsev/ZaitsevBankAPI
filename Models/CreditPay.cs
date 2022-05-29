@@ -2,6 +2,7 @@
 {
     public class CreditPay
     {
+        public string idCredit { get; set; }
         public string numberDocument { get; set; }
 
         public DateTime dateCreditOffers { get; set; } // Дата кредита оформления
@@ -13,6 +14,7 @@
 
     public class CreditPaysTransaction
     {
+        public string idTransaction { get; set; }
         public bool overdue { get; set; } // Просроченный 
         public bool waiting { get; set; } // Ожидающий прямо сейчас    
 
