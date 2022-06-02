@@ -10,7 +10,7 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
     public class ExpensesGetList
     {
         private readonly int operationOutgoingTransfer = (int)OperationNumber.OutgoingTransfer; //Исходящий
-        private readonly int operationRepaymentCredit = (int)OperationNumber.RepaymentCredit; // Погащение кредита
+        private readonly int operationPaymentCredit = (int)OperationNumber.PaymentCredit; // Погащение кредита
         private readonly int operationPayment = (int)OperationNumber.PaymentServices;
         private readonly List<string> allvalute = new CreditCard().CardValute;
         public async Task<List<Expenses>?> ExpensesAsync(string userID)
@@ -106,8 +106,8 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
                     }
                 }
                 list.RemoveAll(x => x.summ == 0);
-                GC.Collect();
-                return list.Count > 0 ? list : null;
+                GC.Collect();;
+                return list.Count > 0 ? list.OrderByDescending(x => x.valuteType.Contains("RUB")).ToList() : null;
             }
             else
             {
@@ -174,14 +174,14 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
         private async Task<(double, string)?> GetPaymentCreditAsync(Guid userID, DateTime In, DateTime Out)
         {
             using ApplicationContext _context = new();
-            var transactionList = await _context.Credits.Include(x => x.Transactions).Where(x => x.UserID == userID && x.Transactions.Any(y => y.ArrivalDate >= In && y.ArrivalDate <= Out && y.CodeOperation == operationRepaymentCredit)).ToListAsync();
+            var transactionList = await _context.Credits.Include(x => x.Transactions).Where(x => x.UserID == userID && x.Transactions.Any(y => y.ArrivalDate >= In && y.ArrivalDate <= Out && y.CodeOperation == operationPaymentCredit)).ToListAsync();
             if (transactionList.Count == 0) return null;
             double summ = 0;
             foreach (Credits item in transactionList)
             {
                 foreach (Transactions transactions in item.Transactions)
                 {
-                    if (transactions.CodeOperation == operationRepaymentCredit && transactions.ArrivalDate >= In && transactions.ArrivalDate <= Out)
+                    if (transactions.CodeOperation == operationPaymentCredit && transactions.ArrivalDate >= In && transactions.ArrivalDate <= Out)
                     {
                         summ += transactions.Arrival.Value;
                     }
