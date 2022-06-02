@@ -23,6 +23,7 @@ namespace ZaitsevBankAPI.Services.TransactionsServices
         private readonly int operationRepaymentCredit = (int)OperationNumber.RepaymentCredit; // Погащение кредита
         private readonly int operationCreditPaymentExpected = (int)OperationNumber.CreditPaymentExpected; // Ожидается оплата по кредитному долгу
 
+       
         public async Task<List<AllTransactions>?> GetAllCurrencyTransaction(DateTime dateIN, DateTime dateFrom, Guid userID)
         {
             List<AllTransactions> list = new();

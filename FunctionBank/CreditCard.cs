@@ -8,7 +8,7 @@
             VISA = 4,
             MIR = 2
         }
-        private List<string> CardValute =  new () {
+        public List<string> CardValute = new () {
             "EUR",
             "USD",
             "RUB",
