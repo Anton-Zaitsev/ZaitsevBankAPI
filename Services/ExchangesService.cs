@@ -69,7 +69,7 @@ namespace ZaitsevBankAPI.Services
                 }
                 else
                 {
-                    return null;
+                    return data.ValuteConvert;
                 }
 
             }
