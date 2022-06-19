@@ -48,7 +48,7 @@ namespace ZaitsevBankAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateAccount(string FirstName, string LastName, string MiddleName, string Birthday, string Gender)
+        public async Task<IActionResult> CreateAccount(string FirstName, string LastName, string Birthday, string Gender,string? MiddleName = null)
         {
 
             StringValues headerValueLogin = Request.Headers["login"];
